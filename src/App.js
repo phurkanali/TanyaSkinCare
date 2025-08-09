@@ -10,6 +10,7 @@ const stats = {
   instagram: 44,        // Will show as 44K+
   monthlyViews: 17,   // Will show as 16.7M+
 };
+console.log('ENV VERSION:', process.env.REACT_APP_VERSION);   
 
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true"; // ✅ Flag from .env
@@ -243,7 +244,12 @@ function Footer() {
           <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="text-blue-600 underline">YouTube</a> | 
           <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 underline ml-1">Instagram</a>
         </span>
+        <span className="text-xs text-gray-400 ml-auto">
+  v{process.env.REACT_APP_VERSION}
+</span>
+
       </div>
     </footer>
   );
 }
+
