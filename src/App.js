@@ -6,9 +6,9 @@ import { useInView } from "react-intersection-observer";
 import VideosSection from "./VideosSection";
 
 const stats = {
-  subscribers: 127,     // Will show as 127K+
+  subscribers: 128,     // Will show as 127K+
   instagram: 44,        // Will show as 44K+
-  monthlyViews: 16.7,   // Will show as 16.7M+
+  monthlyViews: 17,   // Will show as 16.7M+
 };
 
 export default function App() {
@@ -122,7 +122,7 @@ function Hero() {
           <div className="mt-8 grid grid-cols-3 gap-4 max-w-sm">
             <Stat label="YouTube" value={stats.subscribers} suffix="K+" />
             <Stat label="Instagram" value={stats.instagram} suffix="K+" />
-            <Stat label="Monthly Views" value={stats.monthlyViews} suffix="M+" />
+            <Stat label="YT Monthly Views" value={stats.monthlyViews} suffix="M+" />
           </div>
         </div>
 
