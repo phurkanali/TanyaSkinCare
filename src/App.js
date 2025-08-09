@@ -5,43 +5,45 @@ import AOS from "aos";
 import { useInView } from "react-intersection-observer";
 import VideosSection from "./VideosSection";
 
-// Mock stats (replace with real API later if desired)
+// Mock stats (replace with real API data)
 const stats = {
-  subscribers: 128,   // Shows as 128K+
-  instagram: 44,      // Shows as 44K+
-  monthlyViews: 17,   // Shows as 17M+
+  subscribers: 128,
+  instagram: 44,
+  monthlyViews: 17,
 };
-
-console.log('ENV VERSION:', process.env.REACT_APP_VERSION); // Debug
 
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
+    window.scrollTo(0, 0); // ensure starting at top on load
   }, []);
 
   return (
-    // Flex column layout ensures footer stays at bottom
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       <TopBar showShopSection={showShopSection} />
-      {/* Main grows to fill vertical space */}
       <main className="flex-1">
         <section id="home"><Hero stats={stats} /></section>
         <section id="videos"><VideosSection /></section>
         {showShopSection && <section id="shop"><ShopSection /></section>}
-        <section id="about"><AboutSection /></section>
-        <section id="collaboration"><CollaborationSection /></section>
-        <section id="contact"><ContactSection /></section>
+        <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
+        <section id="collaboration" className="scroll-mt-[80px]"><CollaborationSection /></section>
+
+        {/* Disclaimer rendered as a plain div, not included in nav tabs */}
+        <DisclaimerSection />
+
+        <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
       <Footer />
     </div>
   );
 }
 
-// ---------- TopBar ----------
+// TopBar manages the navigation and active tab state
 function TopBar({ showShopSection }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("home"); // default selected tab
 
   return (
     <header className="w-full bg-white shadow-sm sticky top-0 z-50">
@@ -52,13 +54,13 @@ function TopBar({ showShopSection }) {
         </div>
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-4 text-sm items-center">
-          <NavItem to="home">Home</NavItem>
-          <NavItem to="videos">Videos</NavItem>
-          {showShopSection && <NavItem to="shop">My Favorites</NavItem>}
-          <NavItem to="about">About Me</NavItem>
-          <NavItem to="collaboration">Collaboration</NavItem>
-          <NavItem to="contact">Say Hello</NavItem>
-          <a href="http://instagram.com/tanikhanvlog1996/" aria-label="Instagram" target="_blank" rel="noreferrer" className="text-pink-500 font-bold hover:underline">IG</a>
+          <NavItem to="home" activeTab={activeTab} setActiveTab={setActiveTab}>Home</NavItem>
+          <NavItem to="videos" activeTab={activeTab} setActiveTab={setActiveTab}>Videos</NavItem>
+          {showShopSection && <NavItem to="shop" activeTab={activeTab} setActiveTab={setActiveTab}>My Favorites</NavItem>}
+          <NavItem to="about" activeTab={activeTab} setActiveTab={setActiveTab}>About Me</NavItem>
+          <NavItem to="collaboration" activeTab={activeTab} setActiveTab={setActiveTab}>Collaboration</NavItem>
+          <NavItem to="contact" activeTab={activeTab} setActiveTab={setActiveTab}>Say Hello</NavItem>
+          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 font-bold hover:underline">IG</a>
         </nav>
         {/* Mobile Hamburger */}
         <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden focus:outline-none" aria-label="Toggle menu">
@@ -69,15 +71,15 @@ function TopBar({ showShopSection }) {
           </div>
         </button>
       </div>
-      {/* Mobile Menu */}
+      {/* Mobile Nav Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white px-4 py-3 space-y-2 animate-slide-down">
-          <NavItem to="home" onClick={() => setMenuOpen(false)}>Home</NavItem>
-          <NavItem to="videos" onClick={() => setMenuOpen(false)}>Videos</NavItem>
-          {showShopSection && <NavItem to="shop" onClick={() => setMenuOpen(false)}>My Favorites</NavItem>}
-          <NavItem to="about" onClick={() => setMenuOpen(false)}>About Me</NavItem>
-          <NavItem to="collaboration" onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
-          <NavItem to="contact" onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
+          <NavItem to="home" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Home</NavItem>
+          <NavItem to="videos" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Videos</NavItem>
+          {showShopSection && <NavItem to="shop" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>My Favorites</NavItem>}
+          <NavItem to="about" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>About Me</NavItem>
+          <NavItem to="collaboration" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
+          <NavItem to="contact" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
           <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="block text-pink-500 font-bold hover:underline">Instagram</a>
         </div>
       )}
@@ -85,17 +87,31 @@ function TopBar({ showShopSection }) {
   );
 }
 
-// ---------- Navigation Item ----------
-function NavItem({ to, children, onClick }) {
+// NavItem component with dynamic offset and active tab state
+function NavItem({ to, children, onClick, activeTab, setActiveTab }) {
+  const headerHeight = typeof window !== "undefined" ? document.querySelector('header')?.offsetHeight || 70 : 70;
+
   return (
-    <Link to={to} smooth={true} duration={500} offset={-70} onClick={onClick}
-      className="hover:underline cursor-pointer block px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-pink-300">
+    <Link
+      to={to}
+      smooth={true}
+      duration={500}
+      offset={-headerHeight}
+      spy={true}
+      isDynamic={true}
+      activeClass="nav-active"
+      onClick={onClick}
+      onSetActive={() => setActiveTab(to)}
+      className={`block px-2 py-1 rounded cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-pink-300 ${
+        activeTab === to ? "nav-active" : ""
+      }`}
+    >
       {children}
     </Link>
   );
 }
 
-// ---------- Hero ----------
+// Hero component
 function Hero({ stats }) {
   return (
     <section className="bg-gradient-to-br from-pink-200 via-pink-300 to-orange-200 py-16" data-aos="fade-up">
@@ -103,8 +119,7 @@ function Hero({ stats }) {
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900">Welcome to Tanya Fashion Skincare 💖</h2>
           <p className="mt-3 text-gray-800 text-lg">
-            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family of
-            127K YouTube subscribers and 44K Instagram followers.
+            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family of 127K YouTube subscribers and 44K Instagram followers.
           </p>
           <div className="mt-6 flex gap-3 flex-wrap">
             <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="px-5 py-3 bg-red-600 text-white rounded-lg text-sm shadow hover:bg-red-700">Subscribe on YouTube</a>
@@ -118,7 +133,7 @@ function Hero({ stats }) {
         </div>
         <div className="flex items-center justify-center">
           <div className="w-64 h-64 rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden">
-            <img alt="Tanya" src="https://placehold.co/300x300?text=Tanya" className="object-cover w-full h-full" />
+            <img alt="Tanya" src="/new-tanya.png" className="object-cover w-full h-full" />
           </div>
         </div>
       </div>
@@ -126,20 +141,22 @@ function Hero({ stats }) {
   );
 }
 
-// ---------- Stat ----------
+// Stat component
 function Stat({ label, value, suffix }) {
   const { ref, inView } = useInView({ triggerOnce: true });
   return (
     <div ref={ref} className="bg-white p-4 rounded-lg shadow text-center" data-aos="zoom-in">
       <div className="text-xs text-gray-500">{label}</div>
       <div className="text-xl font-bold text-gray-900">
-        {inView && <CountUp end={value} duration={2} decimals={suffix.includes("M") ? 1 : 0} suffix={suffix} />}
+        {inView && (
+          <CountUp end={value} duration={2} decimals={suffix.includes("M") ? 1 : 0} suffix={suffix} />
+        )}
       </div>
     </div>
   );
 }
 
-// ---------- Shop Section ----------
+// ShopSection
 function ShopSection() {
   return (
     <section className="py-16 bg-orange-50" data-aos="fade-up">
@@ -147,7 +164,7 @@ function ShopSection() {
         <h3 className="text-3xl font-semibold text-gray-900">My Favorite Products</h3>
         <p className="text-sm text-gray-700 mt-2">These are some of the skincare items I personally use and love!</p>
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3].map(i => (
             <div key={i} className="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow" data-aos="zoom-in">
               <div className="h-32 bg-gray-100 mb-3 flex items-center justify-center">Product</div>
               <div className="text-md font-medium">Product {i}</div>
@@ -161,7 +178,7 @@ function ShopSection() {
   );
 }
 
-// ---------- About Section ----------
+// AboutSection
 function AboutSection() {
   return (
     <section className="py-16 bg-purple-50" data-aos="fade-up">
@@ -176,10 +193,10 @@ function AboutSection() {
   );
 }
 
-// ---------- Collaboration Section ----------
+// CollaborationSection
 function CollaborationSection() {
   return (
-    <section className="py-16 bg-gradient-to-br from-pink-100 via-orange-100 to-pink-200" data-aos="fade-up">
+    <div className="py-16 bg-gradient-to-br from-pink-100 via-orange-100 to-pink-200" data-aos="fade-up">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <h3 className="text-3xl font-semibold text-gray-900">Collaboration & Partnerships</h3>
         <p className="mt-3 text-gray-700 text-lg">
@@ -192,16 +209,28 @@ function CollaborationSection() {
             tanyaskincare123@gmail.com
           </a>
         </p>
-        <a href="/Tanya-Media-Kit.pdf" download
-          className="inline-block mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg shadow hover:bg-pink-600">
+        <a href="/Tanya-Media-Kit.pdf" download className="inline-block mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg shadow hover:bg-pink-600">
           📄 Download My Media Kit
         </a>
       </div>
-    </section>
+    </div>
   );
 }
 
-// ---------- Contact Section ----------
+// DisclaimerSection - visually prominent but no nav tab
+function DisclaimerSection() {
+  return (
+    <div className="py-5 bg-yellow-50 max-w-4xl mx-auto px-4 text-center text-sm text-yellow-900 rounded-md shadow mt-4 mb-4">
+      <p>
+        <strong>Disclaimer:</strong> The skincare and haircare tips shared on this channel are based on personal experience and general knowledge. Always{" "}
+        <span className="font-bold text-red-600 underline">do a patch test</span>{" "}
+        before trying any new product or remedy. If you have sensitive skin, allergies, or medical conditions, please consult a dermatologist or healthcare professional before use.
+      </p>
+    </div>
+  );
+}
+
+// ContactSection
 function ContactSection() {
   return (
     <section className="py-16 bg-gray-100" data-aos="fade-up">
@@ -218,7 +247,7 @@ function ContactSection() {
   );
 }
 
-// ---------- Footer ----------
+// Footer
 function Footer() {
   return (
     <footer className="bg-white py-6 border-t">
@@ -228,9 +257,7 @@ function Footer() {
           <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="text-blue-600 underline">YouTube</a> |{' '}
           <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 underline ml-1">Instagram</a>
         </span>
-        <span className="text-xs text-gray-700 font-mono sm:ml-auto">
-          v{process.env.REACT_APP_VERSION}
-        </span>
+        <span className="text-xs text-gray-700 font-mono sm:ml-auto">v{process.env.REACT_APP_VERSION}</span>
       </div>
     </footer>
   );
