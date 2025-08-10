@@ -113,8 +113,9 @@ export default function VideosSection() {
   };
 
   useEffect(() => {
-    fetchVideos();
+    // Reset before fetching to prevent duplicate calls
     loadedIds.current = new Set();
+    fetchVideos();
     // eslint-disable-next-line
   }, []);
 

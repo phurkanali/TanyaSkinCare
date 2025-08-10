@@ -7,9 +7,9 @@ import VideosSection from "./VideosSection";
 
 // Mock stats (replace with real API data)
 const stats = {
-  subscribers: 128,
-  instagram: 44,
-  monthlyViews: 17,
+  subscribers: 129,
+  instagram: 45,
+  monthlyViews: 18,
 };
 
 export default function App() {
@@ -17,7 +17,7 @@ export default function App() {
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
-    window.scrollTo(0, 0); // ensure starting at top on load
+    window.scrollTo(0, 0);
   }, []);
 
   return (
@@ -29,10 +29,7 @@ export default function App() {
         {showShopSection && <section id="shop"><ShopSection /></section>}
         <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
         <section id="collaboration" className="scroll-mt-[80px]"><CollaborationSection /></section>
-
-        {/* Disclaimer rendered as a plain div, not included in nav tabs */}
         <DisclaimerSection />
-
         <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
       <Footer />
@@ -40,10 +37,17 @@ export default function App() {
   );
 }
 
-// TopBar manages the navigation and active tab state
+// TopBar with persistent active tab
 function TopBar({ showShopSection }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("home"); // default selected tab
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("activeTab") || "home";
+  });
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem("activeTab", tab);
+  };
 
   return (
     <header className="w-full bg-white shadow-sm sticky top-0 z-50">
@@ -54,12 +58,12 @@ function TopBar({ showShopSection }) {
         </div>
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-4 text-sm items-center">
-          <NavItem to="home" activeTab={activeTab} setActiveTab={setActiveTab}>Home</NavItem>
-          <NavItem to="videos" activeTab={activeTab} setActiveTab={setActiveTab}>Videos</NavItem>
-          {showShopSection && <NavItem to="shop" activeTab={activeTab} setActiveTab={setActiveTab}>My Favorites</NavItem>}
-          <NavItem to="about" activeTab={activeTab} setActiveTab={setActiveTab}>About Me</NavItem>
-          <NavItem to="collaboration" activeTab={activeTab} setActiveTab={setActiveTab}>Collaboration</NavItem>
-          <NavItem to="contact" activeTab={activeTab} setActiveTab={setActiveTab}>Say Hello</NavItem>
+          <NavItem to="home" activeTab={activeTab} onTabChange={handleTabChange}>Home</NavItem>
+          <NavItem to="videos" activeTab={activeTab} onTabChange={handleTabChange}>Videos</NavItem>
+          {showShopSection && <NavItem to="shop" activeTab={activeTab} onTabChange={handleTabChange}>My Favorites</NavItem>}
+          <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange}>About Me</NavItem>
+          <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange}>Collaboration</NavItem>
+          <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange}>Say Hello</NavItem>
           <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 font-bold hover:underline">IG</a>
         </nav>
         {/* Mobile Hamburger */}
@@ -74,12 +78,12 @@ function TopBar({ showShopSection }) {
       {/* Mobile Nav Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white px-4 py-3 space-y-2 animate-slide-down">
-          <NavItem to="home" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Home</NavItem>
-          <NavItem to="videos" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Videos</NavItem>
-          {showShopSection && <NavItem to="shop" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>My Favorites</NavItem>}
-          <NavItem to="about" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>About Me</NavItem>
-          <NavItem to="collaboration" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
-          <NavItem to="contact" activeTab={activeTab} setActiveTab={setActiveTab} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
+          <NavItem to="home" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Home</NavItem>
+          <NavItem to="videos" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Videos</NavItem>
+          {showShopSection && <NavItem to="shop" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>My Favorites</NavItem>}
+          <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>About Me</NavItem>
+          <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
+          <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
           <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="block text-pink-500 font-bold hover:underline">Instagram</a>
         </div>
       )}
@@ -87,8 +91,8 @@ function TopBar({ showShopSection }) {
   );
 }
 
-// NavItem component with dynamic offset and active tab state
-function NavItem({ to, children, onClick, activeTab, setActiveTab }) {
+// NavItem component
+function NavItem({ to, children, onClick, activeTab, onTabChange }) {
   const headerHeight = typeof window !== "undefined" ? document.querySelector('header')?.offsetHeight || 70 : 70;
 
   return (
@@ -101,7 +105,7 @@ function NavItem({ to, children, onClick, activeTab, setActiveTab }) {
       isDynamic={true}
       activeClass="nav-active"
       onClick={onClick}
-      onSetActive={() => setActiveTab(to)}
+      onSetActive={() => onTabChange(to)}
       className={`block px-2 py-1 rounded cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-pink-300 ${
         activeTab === to ? "nav-active" : ""
       }`}
@@ -111,7 +115,7 @@ function NavItem({ to, children, onClick, activeTab, setActiveTab }) {
   );
 }
 
-// Hero component
+// Hero
 function Hero({ stats }) {
   return (
     <section className="bg-gradient-to-br from-pink-200 via-pink-300 to-orange-200 py-16" data-aos="fade-up">
@@ -133,7 +137,7 @@ function Hero({ stats }) {
         </div>
         <div className="flex items-center justify-center">
           <div className="w-64 h-64 rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden">
-            <img alt="Tanya" src="/new-tanya.png" className="object-cover w-full h-full" />
+            <img alt="Tanya" src="/MainPic.JPG" className="object-cover w-full h-full" />
           </div>
         </div>
       </div>
@@ -141,7 +145,7 @@ function Hero({ stats }) {
   );
 }
 
-// Stat component
+// Stat
 function Stat({ label, value, suffix }) {
   const { ref, inView } = useInView({ triggerOnce: true });
   return (
@@ -217,7 +221,7 @@ function CollaborationSection() {
   );
 }
 
-// DisclaimerSection - visually prominent but no nav tab
+// DisclaimerSection
 function DisclaimerSection() {
   return (
     <div className="py-5 bg-yellow-50 max-w-4xl mx-auto px-4 text-center text-sm text-yellow-900 rounded-md shadow mt-4 mb-4">
