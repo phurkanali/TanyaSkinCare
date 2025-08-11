@@ -25,6 +25,7 @@ export default function App() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
+      
       <main className="flex-1">
         <section id="home"><Hero stats={stats} /></section>
         <section id="videos"><VideosSection /></section>
@@ -34,14 +35,18 @@ export default function App() {
         <DisclaimerSection />
         <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
+      
       <Footer />
 
-      {/* Floating Chat Button */}
+      {/* FLOATING Chat Button - positioned OUTSIDE footer to ensure proper floating */}
       <button
         onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 z-50"
+        aria-label="Open Chatbot"
+        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
+        style={{ position: 'fixed' }} // Force fixed positioning
       >
         💬 Chat
+        {!chatOpen && <span className="blink-dot"></span>}
       </button>
 
       {/* Chat Popup */}
@@ -69,6 +74,7 @@ function TopBar({ showShopSection, onChatOpen }) {
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 via-red-400 to-yellow-300 flex items-center justify-center text-white font-bold">TF</div>
           <h1 className="text-lg font-semibold">Tanya Fashion Skincare</h1>
         </div>
+        
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-4 text-sm items-center">
           <NavItem to="home" activeTab={activeTab} onTabChange={handleTabChange}>Home</NavItem>
@@ -77,8 +83,11 @@ function TopBar({ showShopSection, onChatOpen }) {
           <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange}>About Me</NavItem>
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange}>Say Hello</NavItem>
-          <button onClick={onChatOpen} className="text-pink-500 font-bold hover:underline">Chat 💬</button>
+          <button onClick={onChatOpen} className="text-pink-500 font-bold hover:underline" aria-label="Open chat">
+            Chat 💬
+          </button>
         </nav>
+        
         {/* Mobile Hamburger */}
         <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden focus:outline-none" aria-label="Toggle menu">
           <div className="space-y-1">
@@ -88,6 +97,7 @@ function TopBar({ showShopSection, onChatOpen }) {
           </div>
         </button>
       </div>
+      
       {/* Mobile Nav Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white px-4 py-3 space-y-2 animate-slide-down">
@@ -97,7 +107,9 @@ function TopBar({ showShopSection, onChatOpen }) {
           <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>About Me</NavItem>
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
-          <button onClick={() => { onChatOpen(); setMenuOpen(false); }} className="block text-pink-500 font-bold hover:underline">Chat 💬</button>
+          <button onClick={() => { onChatOpen(); setMenuOpen(false); }} className="block text-pink-500 font-bold hover:underline" aria-label="Open chat">
+            Chat 💬
+          </button>
         </div>
       )}
     </header>
@@ -135,7 +147,7 @@ function Hero({ stats }) {
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900">Welcome to Tanya Fashion Skincare 💖</h2>
           <p className="mt-3 text-gray-800 text-lg">
-            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family of 127K YouTube subscribers and 44K Instagram followers.
+            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family of 127K YouTube subscribers and 45K Instagram followers.
           </p>
           <div className="mt-6 flex gap-3 flex-wrap">
             <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="px-5 py-3 bg-red-600 text-white rounded-lg text-sm shadow hover:bg-red-700">Subscribe on YouTube</a>
@@ -201,7 +213,7 @@ function AboutSection() {
       <div className="max-w-4xl mx-auto px-4">
         <h3 className="text-3xl font-semibold text-gray-900">About Me</h3>
         <p className="mt-3 text-gray-700 text-lg">
-          Hi, I’m Tanya! I create DIY skincare tutorials, beauty tips, and fun lifestyle content.
+          Hi, I'm Tanya! I create DIY skincare tutorials, beauty tips, and fun lifestyle content.
           I love connecting with my viewers and sharing easy, affordable ways to look and feel amazing. 💖
         </p>
       </div>
@@ -217,7 +229,7 @@ function CollaborationSection() {
         <h3 className="text-3xl font-semibold text-gray-900">Collaboration & Partnerships</h3>
         <p className="mt-3 text-gray-700 text-lg">
           I love working with brands, creators, and businesses that align with my vision in skincare, beauty, and lifestyle.
-          Let’s create something amazing together! 💖
+          Let's create something amazing together! 💖
         </p>
         <p className="mt-4 text-gray-700">
           📩 Email me at{" "}
@@ -263,7 +275,7 @@ function ContactSection() {
   );
 }
 
-// Footer
+// Footer - NO chat button here
 function Footer() {
   return (
     <footer className="bg-white py-6 border-t">
@@ -290,44 +302,22 @@ function ChatbotPopup({ open, onClose }) {
   }, [onClose]);
 
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+          aria-label="Close chat"
         >
           ✖
         </button>
         <h3 className="text-lg font-semibold mb-2">
-          Ask Tanya’s AI Skincare Bot 🤖
+          Ask Tanya's AI Skincare Bot 🤖
         </h3>
         <SkincareChatbot onClose={onClose} />
       </div>
     </div>
-  );
-}
-
-// Chatbot Wrapper (floating button + popup)
-export function ChatbotWrapper() {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      {/* Floating Chat Button with green blinking dot */}
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Open Chatbot"
-        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 z-50 relative"
-      >
-        💬 Chat
-        {/* Blinking green dot */}
-        <span className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></span>
-        <span className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full"></span>
-      </button>
-
-      {/* Chat Popup */}
-      <ChatbotPopup open={open} onClose={() => setOpen(false)} />
-    </>
   );
 }
