@@ -4,6 +4,7 @@ import { Link } from "react-scroll";
 import AOS from "aos";
 import { useInView } from "react-intersection-observer";
 import VideosSection from "./VideosSection";
+import SkincareChatbot from "./SkincareChatbot";
 
 // Mock stats (replace with real API data)
 const stats = {
@@ -14,6 +15,7 @@ const stats = {
 
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -22,7 +24,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
-      <TopBar showShopSection={showShopSection} />
+      <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
       <main className="flex-1">
         <section id="home"><Hero stats={stats} /></section>
         <section id="videos"><VideosSection /></section>
@@ -33,12 +35,23 @@ export default function App() {
         <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
       <Footer />
+
+      {/* Floating Chat Button */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 z-50"
+      >
+        💬 Chat
+      </button>
+
+      {/* Chat Popup */}
+      <ChatbotPopup open={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }
 
-// TopBar with persistent active tab
-function TopBar({ showShopSection }) {
+// TopBar
+function TopBar({ showShopSection, onChatOpen }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("activeTab") || "home";
@@ -64,7 +77,7 @@ function TopBar({ showShopSection }) {
           <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange}>About Me</NavItem>
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange}>Say Hello</NavItem>
-          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 font-bold hover:underline">IG</a>
+          <button onClick={onChatOpen} className="text-pink-500 font-bold hover:underline">Chat 💬</button>
         </nav>
         {/* Mobile Hamburger */}
         <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden focus:outline-none" aria-label="Toggle menu">
@@ -84,7 +97,7 @@ function TopBar({ showShopSection }) {
           <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>About Me</NavItem>
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
-          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="block text-pink-500 font-bold hover:underline">Instagram</a>
+          <button onClick={() => { onChatOpen(); setMenuOpen(false); }} className="block text-pink-500 font-bold hover:underline">Chat 💬</button>
         </div>
       )}
     </header>
@@ -94,7 +107,6 @@ function TopBar({ showShopSection }) {
 // NavItem component
 function NavItem({ to, children, onClick, activeTab, onTabChange }) {
   const headerHeight = typeof window !== "undefined" ? document.querySelector('header')?.offsetHeight || 70 : 70;
-
   return (
     <Link
       to={to}
@@ -264,5 +276,58 @@ function Footer() {
         <span className="text-xs text-gray-700 font-mono sm:ml-auto">v{process.env.REACT_APP_VERSION}</span>
       </div>
     </footer>
+  );
+}
+
+// Chatbot Popup Component
+function ChatbotPopup({ open, onClose }) {
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
+        >
+          ✖
+        </button>
+        <h3 className="text-lg font-semibold mb-2">
+          Ask Tanya’s AI Skincare Bot 🤖
+        </h3>
+        <SkincareChatbot onClose={onClose} />
+      </div>
+    </div>
+  );
+}
+
+// Chatbot Wrapper (floating button + popup)
+export function ChatbotWrapper() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Floating Chat Button with green blinking dot */}
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Open Chatbot"
+        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 z-50 relative"
+      >
+        💬 Chat
+        {/* Blinking green dot */}
+        <span className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></span>
+        <span className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full"></span>
+      </button>
+
+      {/* Chat Popup */}
+      <ChatbotPopup open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }
