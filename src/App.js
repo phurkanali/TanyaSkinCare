@@ -305,19 +305,42 @@ function ChatbotPopup({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 relative animate-fadeIn">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
-          aria-label="Close chat"
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
         >
           ✖
         </button>
         <h3 className="text-lg font-semibold mb-2">
-          Ask Tanya's AI Skincare Bot 🤖
+          Ask Tanya’s AI Skincare Bot 🤖
         </h3>
         <SkincareChatbot onClose={onClose} />
       </div>
     </div>
+  );
+}
+
+// Chatbot Wrapper (floating button + popup)
+export function ChatbotWrapper() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Floating Chat Button */}
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Open Chatbot"
+        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 relative animate-bounce-slow"
+      >
+        💬 Chat
+        {/* Blinking + bouncing green dot */}
+        <span className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></span>
+        <span className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full"></span>
+      </button>
+
+      {/* Chat Popup */}
+      <ChatbotPopup open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }
