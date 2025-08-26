@@ -8,6 +8,10 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "aos": "^2.3.4",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "dotenv": "^16.4.5",
+    "concurrently": "^8.2.2",
     "react": "^19.1.1",
     "react-countup": "^6.5.3",
     "react-dom": "^19.1.1",
@@ -22,8 +26,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node src/server/ai-chat.js",
+    "dev": "concurrently \"npm run server\" \"npm start\""
   },
+  "proxy": "http://localhost:5050",
   "eslintConfig": {
     "extends": [
       "react-app",

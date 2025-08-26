@@ -8,9 +8,9 @@ import SkincareChatbot from "./SkincareChatbot";
 
 // Mock stats (replace with real API data)
 const stats = {
-  subscribers: 132,
-  instagram: 46,
-  monthlyViews: 20,
+  subscribers: 153,
+  instagram: 51,
+  monthlyViews: 33,
 };
 
 export default function App() {
