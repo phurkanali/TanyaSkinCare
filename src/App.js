@@ -5,21 +5,73 @@ import AOS from "aos";
 import { useInView } from "react-intersection-observer";
 import VideosSection from "./VideosSection";
 import SkincareChatbot from "./SkincareChatbot";
+// Add this import with your existing imports
+import { fetchAllSocialStats } from "./services/socialMediaService";
 
-// Mock stats (replace with real API data)
-const stats = {
-  subscribers: 153,
-  instagram: 51,
-  monthlyViews: 33,
+// Add this after your imports, before the stats object
+const SOCIAL_CONFIG = {
+  youtubeChannelId: process.env.REACT_APP_YOUTUBE_CHANNEL_ID,
+  instagramUsername: process.env.REACT_APP_INSTAGRAM_USERNAME,
 };
 
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
+  
+  // NEW: Add these state variables for live stats
+  const [stats, setStats] = useState({
+    subscribers: 158,
+    instagram: 54,
+    monthlyViews: 112,
+  });
+  const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [error, setError] = useState(null);
+
+  // NEW: Add this function to fetch live stats
+  const fetchLiveStats = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const socialData = await fetchAllSocialStats(
+        SOCIAL_CONFIG.youtubeChannelId,
+        SOCIAL_CONFIG.instagramUsername
+      );
+
+      if (socialData.youtube || socialData.instagram) {
+        setStats(prevStats => ({
+          ...prevStats,
+          ...(socialData.youtube && {
+            subscribers: Math.floor(socialData.youtube.subscribers / 1000),
+            monthlyViews: Math.floor(socialData.youtube.views / 1000000),
+          }),
+          ...(socialData.instagram && {
+            instagram: Math.floor(socialData.instagram.followers / 1000),
+          })
+        }));
+        setLastUpdated(new Date());
+      } else {
+        setError('Unable to fetch live data. Showing cached values.');
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+      setError('Failed to update live stats.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
     window.scrollTo(0, 0);
+    
+    // NEW: Fetch live stats on load
+    fetchLiveStats();
+    
+    // NEW: Auto-refresh every 2 minutes
+    const interval = setInterval(fetchLiveStats, 120000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -27,7 +79,16 @@ export default function App() {
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
       
       <main className="flex-1">
-        <section id="home"><Hero stats={stats} /></section>
+        {/* UPDATE: Pass new props to Hero */}
+        <section id="home">
+          <Hero 
+            stats={stats} 
+            loading={loading} 
+            onRefresh={fetchLiveStats}
+            lastUpdated={lastUpdated}
+            error={error}
+          />
+        </section>
         <section id="videos"><VideosSection /></section>
         {showShopSection && <section id="shop"><ShopSection /></section>}
         <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
@@ -139,24 +200,42 @@ function NavItem({ to, children, onClick, activeTab, onTabChange }) {
   );
 }
 
-// Hero
-function Hero({ stats }) {
+// Hero - UPDATED with live stats
+function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
   return (
     <section className="bg-gradient-to-br from-pink-200 via-pink-300 to-orange-200 py-16" data-aos="fade-up">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900">Welcome to Tanya Fashion Skincare 💖</h2>
           <p className="mt-3 text-gray-800 text-lg">
-            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family of 127K YouTube subscribers and 45K Instagram followers.
+            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family.
           </p>
           <div className="mt-6 flex gap-3 flex-wrap">
             <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="px-5 py-3 bg-red-600 text-white rounded-lg text-sm shadow hover:bg-red-700">Subscribe on YouTube</a>
             <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="px-5 py-3 bg-pink-500 text-white rounded-lg text-sm shadow hover:bg-pink-600">Follow on Instagram</a>
           </div>
-          <div className="mt-8 grid grid-cols-3 gap-4 max-w-sm">
-            <Stat label="YouTube" value={stats.subscribers} suffix="K+" />
-            <Stat label="Instagram" value={stats.instagram} suffix="K+" />
-            <Stat label="YT Monthly Views" value={stats.monthlyViews} suffix="M+" />
+          
+          {/* NEW: Enhanced stats section with live data */}
+          <div className="mt-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Live Stats
+              </h4>
+            </div>
+
+            {/* Status Messages */}
+            {error && (
+              <div className="text-xs text-amber-600 mb-2 flex items-center gap-1">
+                ⚠️ {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-3 gap-4 max-w-sm">
+              <Stat label="YouTube" value={stats.subscribers} suffix="K+" loading={loading} />
+              <Stat label="Instagram" value={stats.instagram} suffix="K+" loading={loading} />
+              <Stat label="YT Views" value={stats.monthlyViews} suffix="M+" loading={loading} />
+            </div>
           </div>
         </div>
         <div className="flex items-center justify-center">
@@ -169,17 +248,28 @@ function Hero({ stats }) {
   );
 }
 
-// Stat
-function Stat({ label, value, suffix }) {
+// Stat - UPDATED with loading state
+function Stat({ label, value, suffix, loading }) {
   const { ref, inView } = useInView({ triggerOnce: true });
   return (
-    <div ref={ref} className="bg-white p-4 rounded-lg shadow text-center" data-aos="zoom-in">
+    <div ref={ref} className="bg-white p-4 rounded-lg shadow text-center relative" data-aos="zoom-in">
       <div className="text-xs text-gray-500">{label}</div>
       <div className="text-xl font-bold text-gray-900">
-        {inView && (
-          <CountUp end={value} duration={2} decimals={suffix.includes("M") ? 1 : 0} suffix={suffix} />
+        {loading ? (
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded"></div>
+          </div>
+        ) : (
+          inView && (
+            <CountUp end={value} duration={2} decimals={suffix.includes("M") ? 1 : 0} suffix={suffix} />
+          )
         )}
       </div>
+      {loading && (
+        <div className="absolute top-1 right-1">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
+      )}
     </div>
   );
 }
@@ -313,7 +403,7 @@ function ChatbotPopup({ open, onClose }) {
           ✖
         </button>
         <h3 className="text-lg font-semibold mb-2">
-          Ask Tanya’s AI Skincare Bot 🤖
+          Ask Tanya's AI Skincare Bot 🤖
         </h3>
         <SkincareChatbot onClose={onClose} />
       </div>
