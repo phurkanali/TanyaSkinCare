@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FiSend, FiThumbsUp, FiThumbsDown } from "react-icons/fi";
 
 function TypingDots() {
@@ -21,17 +21,24 @@ class AIProvider {
     this.provider = provider;
   }
 
+  // Update your AIProvider's getAIResponse method
   async getAIResponse(message, userProfile) {
     try {
+      // Add timeout controller
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const res = await fetch(
-        process.env.REACT_APP_AI_API ||
-          "https://tanya-ai-backend.onrender.com/api/ai-chat",
+        process.env.REACT_APP_AI_API || "https://tanya-ai-backend.onrender.com/api/ai-chat",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message }),
+          signal: controller.signal // Add abort signal
         }
       );
+
+      clearTimeout(timeoutId); // Clear timeout on success
 
       if (!res.ok) {
         throw new Error(`Server error: ${res.status}`);
@@ -40,6 +47,9 @@ class AIProvider {
       const data = await res.json();
       return data.reply || "No response from AI";
     } catch (err) {
+      if (err.name === 'AbortError') {
+        return "⏰ Taking too long to respond. Please try a simpler question!";
+      }
       console.error("AI error:", err);
       return "⚠️ AI service is down. Please try again later.";
     }
@@ -240,6 +250,19 @@ export default function SkincareChatbot({ onClose }) {
     "query",
   ];
 
+  // ✅ Custom debounce function (NOT a hook)
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
   // ✨ Beautify response with pastel bullet bubbles
   const beautifyResponse = (text) => {
     if (!text) return text;
@@ -363,13 +386,14 @@ export default function SkincareChatbot({ onClose }) {
     setInputValue("");
   };
 
-// Updated sendQuery with proper state handling
-const sendQuery = async (currentUserInput) => {
-  const userQuery = currentUserInput || formData.query;
-  
-  if (!userQuery.trim()) return;
+  // Updated sendQuery with proper state handling
+  const sendQuery = async (currentUserInput) => {
+    const userQuery = currentUserInput || formData.query;
+    const messageId = Date.now();
+    
+    if (!userQuery.trim()) return;
 
-  const prompt = `
+    const prompt = `
 You are Tanya, a Skin and Hair Care Specialist who combines medical expertise with traditional Ayurvedic wisdom. Provide practical skincare and haircare advice with lifestyle recommendations in a casual, approachable way.
 
 STRICT RULES - ONLY ANSWER THESE TOPICS:
@@ -429,48 +453,72 @@ REMEMBER: You are ONLY a skincare and haircare specialist. Never discuss other t
 Tone: Chatty, caring, authentic, focused on beauty only 💖
 `;
 
-  // Add user message IMMEDIATELY when function is called
-  setMessages((prev) => [...prev, { sender: "user", text: userQuery }]);
-  setLoading(true);
-  setInputValue(""); // Clear input immediately
+    // Add user message with ID immediately
+    setMessages((prev) => [...prev, { 
+      id: messageId,
+      sender: "user", 
+      text: userQuery,
+      timestamp: new Date().toISOString()
+    }]);
+    
+    setLoading(true);
+    setInputValue("");
 
-  try {
-    const aiResponse = await aiProvider.getAIResponse(prompt);
-    setMessages((prev) => [...prev, { sender: "bot", text: aiResponse }]);
-  } catch (error) {
-    console.error("AI error:", error);
-    const fallbackResponse = aiProvider.getFallbackResponse(userQuery, formData);
-    setMessages((prev) => [...prev, { sender: "bot", text: fallbackResponse }]);
-  }
-
-  setLoading(false);
-};
-
-  const handleSendClick = () => {
-  const currentInput = inputValue.trim();
-  if (currentInput !== "") {
-    if (step < keys.length - 1) {
-      handleNext(currentInput);
-    } else {
-      sendQuery(currentInput); // Pass current input explicitly
+    try {
+      const aiResponse = await aiProvider.getAIResponse(prompt);
+      setMessages((prev) => [...prev, { 
+        id: messageId + 1,
+        sender: "bot", 
+        text: aiResponse,
+        timestamp: new Date().toISOString()
+      }]);
+    } catch (error) {
+      console.error("AI error:", error);
+      const fallbackResponse = aiProvider.getFallbackResponse(userQuery, formData);
+      setMessages((prev) => [...prev, { 
+        id: messageId + 1,
+        sender: "bot", 
+        text: fallbackResponse,
+        timestamp: new Date().toISOString()
+      }]);
     }
-  }
-};
 
-const handleKeyPress = (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
+    setLoading(false);
+  };
+
+  // ✅ MOVE useCallback INSIDE the component
+  const debouncedSendQuery = useCallback(
+    debounce((input) => {
+      sendQuery(input);
+    }, 500),
+    [] // Dependencies
+  );
+
+  // ✅ FIXED event handlers - now inside component with access to state
+  const handleSendClick = () => {
     const currentInput = inputValue.trim();
     if (currentInput !== "") {
       if (step < keys.length - 1) {
         handleNext(currentInput);
       } else {
-        sendQuery(currentInput); // Pass current input explicitly
+        debouncedSendQuery(currentInput); // Use the memoized version
       }
     }
-  }
-};
+  };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const currentInput = inputValue.trim();
+      if (currentInput !== "") {
+        if (step < keys.length - 1) {
+          handleNext(currentInput);
+        } else {
+          debouncedSendQuery(currentInput); // Use the memoized version
+        }
+      }
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>

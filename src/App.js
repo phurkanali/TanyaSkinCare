@@ -5,6 +5,8 @@ import AOS from "aos";
 import { useInView } from "react-intersection-observer";
 import VideosSection from "./VideosSection";
 import SkincareChatbot from "./SkincareChatbot";
+import ErrorBoundary from './ErrorBoundary';
+
 // Add this import with your existing imports
 import { fetchAllSocialStats } from "./services/socialMediaService";
 
@@ -447,3 +449,8 @@ export function ChatbotWrapper() {
     </>
   );
 }
+
+// ✅ This fixes the error
+<ErrorBoundary>
+  <SkincareChatbot onClose={() => setChatOpen(false)} />
+</ErrorBoundary>
