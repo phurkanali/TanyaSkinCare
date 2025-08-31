@@ -471,3 +471,29 @@ h1, h2, h3 {
     transform: translateY(var(--keyboard-offset, 0px));
   }
 }
+
+/* Mobile-specific chatbot styles */
+@media (max-width: 768px) {
+  .chatbot-popup {
+    margin: 8px !important;
+    height: calc(100vh - 16px) !important;
+    max-height: none !important;
+  }
+  
+  .chatbot-input {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding: 14px 16px !important;
+  }
+  
+  .chatbot-button {
+    min-height: 44px !important; /* iOS touch target */
+    min-width: 44px !important;
+  }
+}
+
+/* Prevent body scroll when chatbot is open */
+.chatbot-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}

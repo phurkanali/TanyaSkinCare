@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiSend, FiThumbsUp, FiThumbsDown } from "react-icons/fi";
 
-
 function TypingDots() {
   const [dots, setDots] = React.useState("");
 
@@ -51,7 +50,7 @@ class AIProvider {
     const aiDownResponses = [
       `Hi ${userProfile.name}! 🤖 My AI brain is taking a little break right now, but I'd love to help you! 
 
-For immediate skincare advice, check out my latest videos on YouTube: https://youtube.com/@tanyafashionskincare
+For immediate skincare advice, check out my latest videos on YouTube: [https://youtube.com/@tanyafashionskincare](https://youtube.com/@tanyafashionskincare)
 
 I cover everything from ${this.getRelevantTopic(
         message
@@ -59,19 +58,19 @@ I cover everything from ${this.getRelevantTopic(
 
       `Oops! ${userProfile.name} 😅 My AI assistant is currently offline, but don't worry! 
 
-I have tons of helpful content on my YouTube channel that might answer your question: https://youtube.com/@tanyafashionskincare
+I have tons of helpful content on my YouTube channel that might answer your question: [https://youtube.com/@tanyafashionskincare](https://youtube.com/@tanyafashionskincare)
 
 Thanks for your patience, and I hope my videos help! 🌸💕`,
 
       `Sorry ${userProfile.name}! 🔧 My AI is under maintenance right now, but I haven't forgotten about you!
 
-Visit my YouTube channel for detailed skincare guides and tips: https://youtube.com/@tanyafashionskincare
+Visit my YouTube channel for detailed skincare guides and tips: [https://youtube.com/@tanyafashionskincare](https://youtube.com/@tanyafashionskincare)
 
 I'm constantly uploading new content to help with all your beauty concerns! 💄✨`,
 
       `Hi ${userProfile.name}! 🚧 The AI is temporarily down, but I've got you covered!
 
-Head over to my YouTube channel where I share personalized skincare advice: https://youtube.com/@tanyafashionskincare
+Head over to my YouTube channel where I share personalized skincare advice: [https://youtube.com/@tanyafashionskincare](https://youtube.com/@tanyafashionskincare)
 
 You'll find solutions for ${userProfile.skinType || "all"} skin types and much more! 🌟💖`,
     ];
@@ -116,6 +115,97 @@ You'll find solutions for ${userProfile.skinType || "all"} skin types and much m
     this.provider = provider;
     console.log(`Switched to: ${provider}`);
   }
+}
+
+// Add this component for feedback functionality
+function MessageFeedback({ messageId, onFeedback }) {
+  const [feedback, setFeedback] = useState(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleFeedback = async (type) => {
+    if (isSubmitted) return;
+
+    setFeedback(type);
+    setIsSubmitted(true);
+
+    try {
+      await fetch("https://tanya-ai-backend.onrender.com/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          messageId,
+          feedback: type,
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (onFeedback) {
+        onFeedback(type);
+      }
+    } catch (error) {
+      console.error("Failed to send feedback:", error);
+      setIsSubmitted(false);
+      setFeedback(null);
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div style={{ 
+        fontSize: '12px', 
+        color: '#666', 
+        marginTop: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }}>
+        ✨ Thank you for your feedback!
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ 
+      marginTop: '8px', 
+      display: 'flex', 
+      gap: '8px',
+      alignItems: 'center'
+    }}>
+      <span style={{ fontSize: '12px', color: '#666' }}>Was this helpful?</span>
+      
+      <button
+        onClick={() => handleFeedback('like')}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: feedback === 'like' ? '#10b981' : '#9ca3af',
+          fontSize: '16px',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'color 0.2s ease'
+        }}
+      >
+        <FiThumbsUp size={14} />
+      </button>
+
+      <button
+        onClick={() => handleFeedback('dislike')}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: feedback === 'dislike' ? '#ef4444' : '#9ca3af',
+          fontSize: '16px',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'color 0.2s ease'
+        }}
+      >
+        <FiThumbsDown size={14} />
+      </button>
+    </div>
+  );
 }
 
 // Component export at top level
@@ -273,12 +363,24 @@ export default function SkincareChatbot({ onClose }) {
     setInputValue("");
   };
 
-  // Updated sendQuery with AI integration
-  const sendQuery = async () => {
-    const userQuery = formData.query || inputValue;
+// Updated sendQuery with proper state handling
+const sendQuery = async (currentUserInput) => {
+  const userQuery = currentUserInput || formData.query;
+  
+  if (!userQuery.trim()) return;
 
-    const prompt = `
+  const prompt = `
 You are Tanya, a Skin and Hair Care Specialist who combines medical expertise with traditional Ayurvedic wisdom. Provide practical skincare and haircare advice with lifestyle recommendations in a casual, approachable way.
+
+STRICT RULES - ONLY ANSWER THESE TOPICS:
+• Skincare concerns (acne, dark spots, wrinkles, dry/oily skin, etc.)
+• Haircare problems (hair fall, dandruff, hair growth, etc.)
+• Beauty routines and DIY remedies
+• Natural/Ayurvedic treatments for skin and hair
+• Skincare and haircare product recommendations
+
+IF USER ASKS ABOUT NON-BEAUTY TOPICS (cooking, coding, math, weather, news, etc.), RESPOND WITH:
+"Hi ${formData.name}! I'm your skincare and haircare specialist 🌸 Please ask me about skin concerns, hair problems, beauty routines, or DIY remedies. I'm here to help you glow naturally! 💖"
 
 USER PROFILE:
 • Name: ${formData.name}
@@ -297,16 +399,16 @@ COMMUNICATION STYLE:
 • Avoid long essays, focus on quick tips and steps
 • Break replies into easy-to-scan bullet points when needed
 • If user wants more details, offer to explain further
-+ • IMPORTANT: Reply in the same language/style as the user's question (e.g., Hindi → Hindi, Hinglish → Hinglish, English → English)
+• IMPORTANT: Reply in the same language/style as the user's question (e.g., Hindi → Hindi, Hinglish → Hinglish, English → English)
 
-DERMATOLOGICAL APPROACH:
+DERMATOLOGICAL APPROACH (ONLY FOR BEAUTY QUESTIONS):
 • Assess their skin/hair concern in a simple way
 • Suggest 2–3 practical solutions (DIY + safe product options)
 • Give **step-by-step routine** in short form
 • Add **one lifestyle/diet tip** if relevant
 • Warn about precautions and when to see a doctor
 
-RESPONSE STRUCTURE:
+RESPONSE STRUCTURE (ONLY FOR BEAUTY QUESTIONS):
 - Warm, professional greeting using their name
 - Quick assessment of their concern
 - 2–3 practical solutions (mix of DIY + gentle products)
@@ -315,51 +417,63 @@ RESPONSE STRUCTURE:
 - Important precaution in 1 line
 - Encouraging, supportive closing
 
-+ Keep replies **short (max 5–6 sentences)**, avoid long sections or headings.
-+ Do NOT use "Tip 1/Tip 2" or bold section titles. 
-+ Use simple bullets (👉, 🌿, ✨) instead of markdown formatting.
-+ Replies should feel like a quick chat, not a blog article.
-+ Always reply in the same language/style as the user's question. 
-+ If user writes in Hindi → reply in Hindi. 
-+ If user writes in Hinglish → reply in Hinglish. 
-+ If user writes in English → reply in English. 
+FORMATTING RULES:
++ Keep replies **short (max 5–6 sentences)**, avoid long sections or headings
++ Do NOT use "Tip 1/Tip 2" or bold section titles
++ Use simple bullets (👉, 🌿, ✨) instead of markdown formatting
++ Replies should feel like a quick chat, not a blog article
++ Always reply in the same language/style as the user's question
 
-Tone: Chatty, caring, authentic, and easy to follow 💖
+REMEMBER: You are ONLY a skincare and haircare specialist. Never discuss other topics.
+
+Tone: Chatty, caring, authentic, focused on beauty only 💖
 `;
 
-    setMessages((prev) => [...prev, { sender: "user", text: userQuery }]);
-    setLoading(true);
+  // Add user message IMMEDIATELY when function is called
+  setMessages((prev) => [...prev, { sender: "user", text: userQuery }]);
+  setLoading(true);
+  setInputValue(""); // Clear input immediately
 
-    try {
-      const aiResponse = await aiProvider.getAIResponse(prompt);
-      setMessages((prev) => [...prev, { sender: "bot", text: aiResponse }]);
-    } catch (error) {
-      console.error("AI error:", error);
-      const fallbackResponse = aiProvider.getFallbackResponse(
-        userQuery,
-        formData
-      );
-      setMessages((prev) => [...prev, { sender: "bot", text: fallbackResponse }]);
-    }
+  try {
+    const aiResponse = await aiProvider.getAIResponse(prompt);
+    setMessages((prev) => [...prev, { sender: "bot", text: aiResponse }]);
+  } catch (error) {
+    console.error("AI error:", error);
+    const fallbackResponse = aiProvider.getFallbackResponse(userQuery, formData);
+    setMessages((prev) => [...prev, { sender: "bot", text: fallbackResponse }]);
+  }
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   const handleSendClick = () => {
-    if (inputValue.trim() !== "") {
-      handleNext(inputValue.trim());
+  const currentInput = inputValue.trim();
+  if (currentInput !== "") {
+    if (step < keys.length - 1) {
+      handleNext(currentInput);
+    } else {
+      sendQuery(currentInput); // Pass current input explicitly
     }
-  };
+  }
+};
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && inputValue.trim() !== "") {
-      e.preventDefault();
-      handleNext(inputValue.trim());
+const handleKeyPress = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const currentInput = inputValue.trim();
+    if (currentInput !== "") {
+      if (step < keys.length - 1) {
+        handleNext(currentInput);
+      } else {
+        sendQuery(currentInput); // Pass current input explicitly
+      }
     }
-  };
+  }
+};
+
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "70vh" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
       {/* Messages with beautified responses */}
       <div
         style={{
@@ -368,7 +482,8 @@ Tone: Chatty, caring, authentic, and easy to follow 💖
           padding: "1rem",
           background: "#fdf2f8",
           borderRadius: "8px",
-          marginBottom: "80px",
+          paddingBottom: "80px", // Space for input area
+          WebkitOverflowScrolling: "touch" // Smooth scrolling on mobile
         }}
       >
         {messages.map((msg, idx) => (
@@ -387,16 +502,14 @@ Tone: Chatty, caring, authentic, and easy to follow 💖
             }}
           >
             {msg.sender === "bot" ? beautifyResponse(msg.text) : msg.text}
-                {msg.sender === 'bot' && (
-      <MessageFeedback 
-        messageId={`msg-${idx}-${Date.now()}`}
-        onFeedback={(type) => console.log(`Message ${idx} feedback: ${type}`)}
-      />
-    )}
+            {msg.sender === 'bot' && (
+              <MessageFeedback 
+                messageId={`msg-${idx}-${Date.now()}`}
+                onFeedback={(type) => console.log(`Message ${idx} feedback: ${type}`)}
+              />
+            )}
           </div>
         ))}
-
-        
 
         {/* ALL STEPS INCLUDED */}
         {step === 0 && (
@@ -699,153 +812,71 @@ Tone: Chatty, caring, authentic, and easy to follow 💖
         <div ref={messagesEndRef} />
       </div>
 
-      {/* SIMPLE WORKING INPUT */}
+      {/* RESPONSIVE ALIGNED INPUT - FIXED VERSION */}
       {step !== 2 &&
         step !== 3 &&
         step !== 4 &&
         step !== 5 &&
         !loading && (
-          <>
+          <div style={{
+            position: "absolute",  // Changed from "fixed"
+            bottom: "0",
+            left: "0",
+            right: "0",
+            padding: "12px",
+            background: "white",
+            borderTop: "1px solid #e5e7eb",
+            display: "flex",
+            gap: "8px",
+            alignItems: "center",
+            minHeight: "60px",
+            boxSizing: "border-box"
+          }}>
             {/* Input Field */}
             <input
               type="text"
-              placeholder="Type here..."
+              placeholder="Ask me about skincare..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyPress}
               style={{
-                position: "fixed",
-                bottom: "15px",
-                left: "15px",
-                right: "80px",
-                padding: "15px",
+                flex: 1,  // Takes remaining space
+                padding: "12px 16px",
                 border: "2px solid #ec4899",
-                borderRadius: "25px",
+                borderRadius: "20px",
                 fontSize: "16px",
                 outline: "none",
-                zIndex: 99999,
                 background: "white",
+                minWidth: "0",
+                boxSizing: "border-box"
               }}
             />
 
-            {/* Floating Send Button with Icon */}
+            {/* Send Button */}
             <button
               onClick={handleSendClick}
               disabled={!inputValue.trim()}
               style={{
-                position: "fixed",
-                bottom: "15px",
-                right: "15px",
-                width: "50px",
-                height: "50px",
-                background: inputValue.trim() ? "#ec4899" : "#ccc",
+                width: "44px",
+                height: "44px",
+                minWidth: "44px",
+                background: inputValue.trim() ? "#ec4899" : "#d1d5db",
                 border: "none",
-                borderRadius: "50%",
+                borderRadius: "22px",
                 color: "white",
                 cursor: inputValue.trim() ? "pointer" : "not-allowed",
-                zIndex: 99999,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "18px",
+                fontSize: "16px",
                 transition: "all 0.2s ease",
+                flexShrink: 0
               }}
             >
               <FiSend />
             </button>
-          </>
+          </div>
         )}
-    </div>
-  );
-}
-
-// Add this component to your SkincareChatbot.jsx
-function MessageFeedback({ messageId, onFeedback }) {
-  const [feedback, setFeedback] = useState(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleFeedback = async (type) => {
-    if (isSubmitted) return;
-
-    setFeedback(type);
-    setIsSubmitted(true);
-
-    try {
-      await fetch("https://tanya-ai-backend.onrender.com/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          messageId,
-          feedback: type,
-          timestamp: new Date().toISOString()
-        }),
-      });
-
-      if (onFeedback) {
-        onFeedback(type);
-      }
-    } catch (error) {
-      console.error("Failed to send feedback:", error);
-      setIsSubmitted(false);
-      setFeedback(null);
-    }
-  };
-
-  if (isSubmitted) {
-    return (
-      <div style={{ 
-        fontSize: '12px', 
-        color: '#666', 
-        marginTop: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px'
-      }}>
-        ✨ Thank you for your feedback!
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ 
-      marginTop: '8px', 
-      display: 'flex', 
-      gap: '8px',
-      alignItems: 'center'
-    }}>
-      <span style={{ fontSize: '12px', color: '#666' }}>Was this helpful?</span>
-      
-      <button
-        onClick={() => handleFeedback('like')}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: feedback === 'like' ? '#10b981' : '#9ca3af',
-          fontSize: '16px',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          transition: 'color 0.2s ease'
-        }}
-      >
-        <FiThumbsUp size={14} />
-      </button>
-
-      <button
-        onClick={() => handleFeedback('dislike')}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: feedback === 'dislike' ? '#ef4444' : '#9ca3af',
-          fontSize: '16px',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          transition: 'color 0.2s ease'
-        }}
-      >
-        <FiThumbsDown size={14} />
-      </button>
     </div>
   );
 }
