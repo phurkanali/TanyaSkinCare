@@ -325,9 +325,13 @@ function CollaborationSection() {
         </p>
         <p className="mt-4 text-gray-700">
           📩 Email me at{" "}
-          <a href="mailto:tanyaskincare123@gmail.com" className="text-pink-600 underline">
-            tanyaskincare123@gmail.com
-          </a>
+<a 
+  href="mailto:tanyaskincare123@gmail.com" 
+  className="text-pink-600 underline hover:text-pink-700"
+>
+  tanyaskincare123@gmail.com
+</a>
+
         </p>
         <a href="/Tanya-Media-Kit.pdf" download className="inline-block mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg shadow hover:bg-pink-600">
           📄 Download My Media Kit
@@ -358,9 +362,13 @@ function ContactSection() {
         <h3 className="text-3xl font-semibold text-gray-900">Say Hello 👋</h3>
         <p className="text-md text-gray-700 mt-2">
           Have a question, feedback, or just want to say hi? Email me at{" "}
-          <a href="mailto:tanyaskincare123@gmail.com" aria-label="Email Tanya Skincare" className="text-pink-600 underline">
-            tanyaskincare123@gmail.com
-          </a>
+          <a 
+    href="mailto:tanyaskincare123@gmail.com" 
+    aria-label="Email Tanya Skincare" 
+    className="text-pink-600 underline hover:text-pink-700 transition-colors"
+  >
+    tanyaskincare123@gmail.com
+  </a>
         </p>
       </div>
     </section>
@@ -419,7 +427,9 @@ function ChatbotPopup({ open, onClose }) {
           Ask Tanya ✨
         </h3>
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          <SkincareChatbot onClose={onClose} />
+          <ErrorBoundary>
+            <SkincareChatbot onClose={onClose} />
+          </ErrorBoundary>
         </div>
       </div>
     </div>
@@ -449,8 +459,3 @@ export function ChatbotWrapper() {
     </>
   );
 }
-
-// ✅ This fixes the error
-<ErrorBoundary>
-  <SkincareChatbot onClose={() => setChatOpen(false)} />
-</ErrorBoundary>
