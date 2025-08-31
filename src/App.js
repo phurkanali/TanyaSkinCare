@@ -403,7 +403,7 @@ function ChatbotPopup({ open, onClose }) {
           ✖
         </button>
         <h3 className="text-lg font-semibold mb-2">
-          Ask Tanya's AI Skincare Bot 🤖
+          Ask Tanya ✨
         </h3>
         <SkincareChatbot onClose={onClose} />
       </div>

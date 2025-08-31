@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiSend } from "react-icons/fi";
+import { FiSend, FiThumbsUp, FiThumbsDown } from "react-icons/fi";
+
 
 function TypingDots() {
   const [dots, setDots] = React.useState("");
@@ -386,8 +387,16 @@ Tone: Chatty, caring, authentic, and easy to follow 💖
             }}
           >
             {msg.sender === "bot" ? beautifyResponse(msg.text) : msg.text}
+                {msg.sender === 'bot' && (
+      <MessageFeedback 
+        messageId={`msg-${idx}-${Date.now()}`}
+        onFeedback={(type) => console.log(`Message ${idx} feedback: ${type}`)}
+      />
+    )}
           </div>
         ))}
+
+        
 
         {/* ALL STEPS INCLUDED */}
         {step === 0 && (
@@ -746,6 +755,97 @@ Tone: Chatty, caring, authentic, and easy to follow 💖
             </button>
           </>
         )}
+    </div>
+  );
+}
+
+// Add this component to your SkincareChatbot.jsx
+function MessageFeedback({ messageId, onFeedback }) {
+  const [feedback, setFeedback] = useState(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleFeedback = async (type) => {
+    if (isSubmitted) return;
+
+    setFeedback(type);
+    setIsSubmitted(true);
+
+    try {
+      await fetch("https://tanya-ai-backend.onrender.com/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          messageId,
+          feedback: type,
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (onFeedback) {
+        onFeedback(type);
+      }
+    } catch (error) {
+      console.error("Failed to send feedback:", error);
+      setIsSubmitted(false);
+      setFeedback(null);
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div style={{ 
+        fontSize: '12px', 
+        color: '#666', 
+        marginTop: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }}>
+        ✨ Thank you for your feedback!
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ 
+      marginTop: '8px', 
+      display: 'flex', 
+      gap: '8px',
+      alignItems: 'center'
+    }}>
+      <span style={{ fontSize: '12px', color: '#666' }}>Was this helpful?</span>
+      
+      <button
+        onClick={() => handleFeedback('like')}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: feedback === 'like' ? '#10b981' : '#9ca3af',
+          fontSize: '16px',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'color 0.2s ease'
+        }}
+      >
+        <FiThumbsUp size={14} />
+      </button>
+
+      <button
+        onClick={() => handleFeedback('dislike')}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: feedback === 'dislike' ? '#ef4444' : '#9ca3af',
+          fontSize: '16px',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'color 0.2s ease'
+        }}
+      >
+        <FiThumbsDown size={14} />
+      </button>
     </div>
   );
 }
