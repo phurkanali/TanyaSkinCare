@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FiSend, FiThumbsUp, FiThumbsDown } from "react-icons/fi";
+import { FiSend, FiThumbsUp, FiThumbsDown, FiCamera } from "react-icons/fi";
+import * as faceapi from 'face-api.js'; // ✨ Add this import
 
 function TypingDots() {
   const [dots, setDots] = React.useState("");
@@ -21,12 +22,10 @@ class AIProvider {
     this.provider = provider;
   }
 
-  // Update your AIProvider's getAIResponse method
   async getAIResponse(message, userProfile) {
     try {
-      // Add timeout controller
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const res = await fetch(
         process.env.REACT_APP_AI_API || "https://tanya-ai-backend.onrender.com/api/ai-chat",
@@ -34,11 +33,11 @@ class AIProvider {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message }),
-          signal: controller.signal // Add abort signal
+          signal: controller.signal
         }
       );
 
-      clearTimeout(timeoutId); // Clear timeout on success
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         throw new Error(`Server error: ${res.status}`);
@@ -56,7 +55,6 @@ class AIProvider {
   }
 
   getFallbackResponse(message, userProfile) {
-    // AI down fallback responses
     const aiDownResponses = [
       `Hi ${userProfile.name}! 🤖 My AI brain is taking a little break right now, but I'd love to help you! 
 
@@ -85,7 +83,6 @@ Head over to my YouTube channel where I share personalized skincare advice: [htt
 You'll find solutions for ${userProfile.skinType || "all"} skin types and much more! 🌟💖`,
     ];
 
-    // Return a random response for variety
     const randomIndex = Math.floor(Math.random() * aiDownResponses.length);
     return aiDownResponses[randomIndex];
   }
@@ -127,7 +124,6 @@ You'll find solutions for ${userProfile.skinType || "all"} skin types and much m
   }
 }
 
-// Add this component for feedback functionality
 function MessageFeedback({ messageId, onFeedback }) {
   const [feedback, setFeedback] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -218,9 +214,7 @@ function MessageFeedback({ messageId, onFeedback }) {
   );
 }
 
-// Component export at top level
 export default function SkincareChatbot({ onClose }) {
-  // Initialize AI provider
   const [aiProvider] = useState(() => new AIProvider("deepseek"));
 
   const [step, setStep] = useState(0);
@@ -239,6 +233,14 @@ export default function SkincareChatbot({ onClose }) {
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✨ Face analysis states
+  const [showImageUpload, setShowImageUpload] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [imageAnalyzing, setImageAnalyzing] = useState(false);
+  
+  // ✨ NEW: Face-API.js model loading state
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+
   const messagesEndRef = useRef(null);
   const keys = [
     "name",
@@ -250,7 +252,29 @@ export default function SkincareChatbot({ onClose }) {
     "query",
   ];
 
-  // ✅ Custom debounce function (NOT a hook)
+  // ✨ NEW: Load Face-API.js models on component mount
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const MODEL_URL = '/models';
+        
+        // Load required models
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+        ]);
+        
+        setModelsLoaded(true);
+        console.log('Face-API.js models loaded successfully!');
+      } catch (error) {
+        console.error('Failed to load Face-API.js models:', error);
+      }
+    };
+    
+    loadModels();
+  }, []);
+
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -259,78 +283,535 @@ export default function SkincareChatbot({ onClose }) {
         func(...args);
       };
       clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+      setTimeout(later, wait);
     };
   }
 
-  // ✨ Beautify response with pastel bullet bubbles
-  const beautifyResponse = (text) => {
-    if (!text) return text;
+  // ✨ NEW: Helper function to generate skin problems based on age
+  const generateSkinProblemsFromAge = (age, gender) => {
+    const problems = [];
+    
+    if (age >= 18 && age < 25) {
+      problems.push('Possible acne or occasional breakouts');
+      problems.push('Oily T-zone area');
+    } else if (age >= 25 && age < 35) {
+      problems.push('Early signs of aging around eyes');
+      problems.push('Possible dark circles from stress');
+      problems.push('Minor skin texture changes');
+    } else if (age >= 35 && age < 45) {
+      problems.push('Fine lines and wrinkles starting to appear');
+      problems.push('Possible age spots or pigmentation');
+      problems.push('Skin elasticity beginning to decrease');
+    } else if (age >= 45) {
+      problems.push('More visible wrinkles and fine lines');
+      problems.push('Age spots and pigmentation issues');
+      problems.push('Skin firmness and elasticity concerns');
+    }
 
-    // Split into lines
-    const lines = text
-      .replace(/[\x00-\x1F\x7F]+/g, " ")
-      .split(/(?=\n|👉|🌿|✨)/g);
+    if (gender === 'female' && age > 30) {
+      problems.push('Hormonal skin changes');
+    }
 
-    return lines.map((line, i) => {
-      const trimmed = line.trim();
-      if (!trimmed) return null;
+    return problems;
+  };
 
-      // Bullet styling
-      if (trimmed.startsWith("👉")) {
-        return (
-          <div
-            key={i}
-            style={{
-              background: "#fef3c7",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              marginBottom: "6px",
-            }}
-          >
-            {trimmed}
-          </div>
-        );
-      }
-      if (trimmed.startsWith("🌿")) {
-        return (
-          <div
-            key={i}
-            style={{
-              background: "#d1fae5",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              marginBottom: "6px",
-            }}
-          >
-            {trimmed}
-          </div>
-        );
-      }
-      if (trimmed.startsWith("✨")) {
-        return (
-          <div
-            key={i}
-            style={{
-              background: "#e0e7ff",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              marginBottom: "6px",
-            }}
-          >
-            {trimmed}
-          </div>
-        );
-      }
+  // ✨ NEW: Helper function to generate recommendations based on age
+  const generateRecommendationsFromAge = (age, gender) => {
+    const recommendations = [];
+    
+    recommendations.push('Use sunscreen daily (SPF 30+)');
+    recommendations.push('Drink 8+ glasses of water daily');
+    recommendations.push('Get 7-8 hours of quality sleep');
+    
+    if (age < 25) {
+      recommendations.push('Use gentle cleanser twice daily');
+      recommendations.push('Light moisturizer for your skin type');
+      recommendations.push('Spot treatment for any breakouts');
+    } else if (age < 35) {
+      recommendations.push('Add vitamin C serum to morning routine');
+      recommendations.push('Use retinol 2-3 times per week (start slowly)');
+      recommendations.push('Hydrating eye cream for prevention');
+    } else if (age < 45) {
+      recommendations.push('Consistent retinol use (build up tolerance)');
+      recommendations.push('Anti-aging moisturizer with peptides');
+      recommendations.push('Weekly exfoliation with AHA/BHA');
+    } else {
+      recommendations.push('Intensive anti-aging serum with retinol');
+      recommendations.push('Rich moisturizer for mature skin');
+      recommendations.push('Professional treatments (consider dermatologist)');
+    }
 
-      // Normal text
+    if (age > 25) {
+      recommendations.push('Eat antioxidant-rich foods (berries, green tea)');
+    }
+    
+    return recommendations;
+  };
+
+  // ✨ NEW: Helper function to calculate skin health score
+  const calculateSkinHealthScore = (age, detectionScore) => {
+    let score = detectionScore;
+    
+    if (age < 25) {
+      score += 10;
+    } else if (age > 40) {
+      score -= 5;
+    }
+    
+    return Math.min(100, Math.max(60, score));
+  };
+
+  // ✅ COMPLETE FIX: Update your analyzeFaceImage function with this corrected version
+const analyzeFaceImage = async (file) => {
+  if (!modelsLoaded) {
+    alert('AI models are still loading. Please wait a moment and try again.');
+    return;
+  }
+
+  setImageAnalyzing(true);
+  
+  const imageUrl = URL.createObjectURL(file);
+  setUploadedImage(imageUrl);
+  
+  setMessages(prev => [...prev, {
+    id: Date.now(),
+    sender: "user",
+    text: "Please analyze my face photo",
+    image: imageUrl,
+    timestamp: new Date().toISOString()
+  }]);
+
+  try {
+    const img = new Image();
+    img.src = imageUrl;
+    
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+
+    const detection = await faceapi
+      .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withAgeAndGender();
+
+    if (!detection) {
+      throw new Error('No face detected');
+    }
+
+    // ✅ EXTRACT AGE CORRECTLY
+    const age = Math.round(detection.age);
+    const gender = detection.gender;
+    const genderConfidence = Math.round(detection.genderProbability * 100);
+    const faceScore = Math.round(detection.detection.score * 100);
+    
+    const skinProblems = generateSkinProblemsFromAge(age, gender);
+    const recommendations = generateRecommendationsFromAge(age, gender);
+    const skinHealthScore = calculateSkinHealthScore(age, faceScore);
+
+const detectedAge = Math.round(detection.age);
+const userRealAge = parseInt(formData.age); // From user input
+const ageDifference = detectedAge - userRealAge;
+
+// Generate age comparison message with better styling and emojis
+let ageComparison = '';
+let ageComparisonEmoji = '';
+let ageComparisonColor = '';
+
+if (Math.abs(ageDifference) <= 2) {
+  ageComparison = `🎯 **Perfect Match!** The AI detected your age exactly right!`;
+  ageComparisonEmoji = '🎯';
+  ageComparisonColor = '#10b981'; // Green
+} else if (ageDifference < -5) {
+  ageComparison = `🌟 **Incredible!** You look ${Math.abs(ageDifference)} years younger! Your skincare routine is working amazingly!`;
+  ageComparisonEmoji = '🌟';
+  ageComparisonColor = '#059669'; // Darker green
+} else if (ageDifference < -3) {
+  ageComparison = `✨ **Fantastic!** You look ${Math.abs(ageDifference)} years younger than your actual age!`;
+  ageComparisonEmoji = '✨';
+  ageComparisonColor = '#10b981'; // Green
+} else if (ageDifference > 5) {
+  ageComparison = `⚠️ **Skincare Focus Needed:** You appear ${ageDifference} years older. Let's create a targeted routine to help you look your age!`;
+  ageComparisonEmoji = '⚠️';
+  ageComparisonColor = '#dc2626'; // Red
+} else if (ageDifference > 3) {
+  ageComparison = `🔧 **Room for Improvement:** You appear ${ageDifference} years older. Some skincare adjustments could help!`;
+  ageComparisonEmoji = '🔧';
+  ageComparisonColor = '#f59e0b'; // Orange
+} else {
+  ageComparison = `💫 **Pretty Good!** Very close to your actual age!`;
+  ageComparisonEmoji = '💫';
+  ageComparisonColor = '#8b5cf6'; // Purple
+}
+
+// ✅ ENHANCED: Beautiful analysis text with better structure
+const analysisText = `🎉 **Face Analysis Complete!**
+
+📊 **Your Age Analysis:**
+👤 Your Real Age: ${userRealAge} years old
+🤖 AI Detected Age: ${detectedAge} years old
+
+${ageComparison}
+
+💯 **Overall Assessment:**
+💯 Skin Health Score: ${skinHealthScore}/100
+🎯 Detection Confidence: ${faceScore}%
+
+${skinProblems.length > 0 ? 
+  `🔍 **Areas to Focus On:**\n${skinProblems.map(problem => `👉 ${problem}`).join('\n')}` 
+  : `✨ **Excellent News!**\n👉 Your skin looks ${ageDifference < -2 ? 'younger than' : 'great for'} your age!`}
+
+💡 **My Personal Recommendations:**
+${recommendations.slice(0, 4).map(rec => `🌿 ${rec}`).join('\n')}
+
+${userRealAge < 25 ? 
+  '🛡️ **Your Focus:** Protection and prevention at your young age!' :
+  userRealAge < 35 ? 
+  '💫 **Your Focus:** Maintain your skin health with consistent care!' :
+  '🌟 **Your Focus:** Anti-aging and repair treatments are perfect now!'
+}
+
+${ageDifference > 3 ? 
+  'Would you like specific anti-aging remedies to look younger? 🌟' :
+  ageDifference < -3 ?
+  'Want to know your secret to looking so young? Keep it up! ✨' :
+  'Would you like specific DIY remedies for any of these concerns? 💖'
+}`;
+
+
+    setMessages(prev => [...prev, {
+      id: Date.now() + 1,
+      sender: "bot",
+      text: analysisText,
+      timestamp: new Date().toISOString()
+    }]);
+
+  } catch (error) {
+    console.error('Face analysis error:', error);
+    
+    let errorMessage = `Sorry ${formData.name}, I couldn't analyze your photo. `;
+    
+    if (error.message === 'No face detected') {
+      errorMessage += `No face was detected. Please try again with:
+
+📸 Photo Tips:
+• Face clearly visible and well-lit
+• Look directly at camera
+• Remove sunglasses/masks
+• Avoid heavy shadows
+
+Feel free to ask any skincare questions! 😊`;
+    } else {
+      errorMessage += `Please try again with a clear, well-lit face photo, or ask me any skincare questions! 💕`;
+    }
+
+    setMessages(prev => [...prev, {
+      id: Date.now() + 1,
+      sender: "bot",
+      text: errorMessage,
+      timestamp: new Date().toISOString()
+    }]);
+  } finally {
+    setImageAnalyzing(false);
+    setShowImageUpload(false);
+  }
+};
+
+  // ✨ UPDATED: Handle image upload (add model loading check)
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!modelsLoaded) {
+      alert('AI models are still loading. Please wait a moment and try again.');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file only');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please upload an image smaller than 5MB');
+      return;
+    }
+
+    analyzeFaceImage(file);
+  };
+
+const beautifyResponse = (text) => {
+  if (!text) return text;
+
+  // ✅ FIXED: Better text processing for multiline content
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+
+  return lines.map((line, i) => {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+
+    // Remove ** markdown symbols
+    const cleanLine = trimmed.replace(/\*\*/g, '');
+
+    // Face Analysis Complete
+    if (cleanLine.includes("Face Analysis Complete")) {
       return (
-        <div key={i} style={{ marginBottom: "6px" }}>
-          {trimmed}
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          color: "white",
+          padding: "16px",
+          borderRadius: "16px",
+          marginBottom: "16px",
+          textAlign: "center",
+          fontWeight: "700",
+          fontSize: "18px",
+          boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)"
+        }}>
+          🎉 Face Analysis Complete!
         </div>
       );
-    });
-  };
+    }
+
+    // Age Analysis header
+    if (cleanLine.includes("Your Age Analysis")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%)",
+          border: "2px solid #3b82f6",
+          padding: "14px",
+          borderRadius: "12px",
+          marginBottom: "12px",
+        }}>
+          <strong style={{ color: "#1e40af", fontSize: "16px" }}>📊 Your Age Analysis</strong>
+        </div>
+      );
+    }
+
+    // Real Age
+    if (cleanLine.includes("Real Age:")) {
+      return (
+        <div key={i} style={{
+          background: "#f8fafc",
+          border: "2px solid #e2e8f0",
+          padding: "12px",
+          borderRadius: "10px",
+          marginBottom: "6px",
+          fontSize: "16px",
+          fontWeight: "600",
+          color: "#475569"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // AI Detected Age
+    if (cleanLine.includes("AI Detected Age:")) {
+      return (
+        <div key={i} style={{
+          background: "#f1f5f9",
+          border: "2px solid #94a3b8",
+          padding: "12px",
+          borderRadius: "10px",
+          marginBottom: "16px",
+          fontSize: "16px",
+          fontWeight: "600",
+          color: "#475569"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // Age comparison results
+    if (cleanLine.includes("Incredible!")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+          border: "3px solid #059669",
+          padding: "20px",
+          borderRadius: "15px",
+          marginBottom: "20px",
+          fontSize: "18px",
+          fontWeight: "700",
+          color: "#047857",
+          textAlign: "center",
+          boxShadow: "0 8px 25px rgba(5, 150, 105, 0.4)"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    if (cleanLine.includes("Perfect Match!")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
+          border: "3px solid #10b981",
+          padding: "18px",
+          borderRadius: "15px",
+          marginBottom: "18px",
+          fontSize: "17px",
+          fontWeight: "700",
+          color: "#047857",
+          textAlign: "center",
+          boxShadow: "0 6px 20px rgba(16, 185, 129, 0.3)"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // Overall Assessment
+    if (cleanLine.includes("Overall Assessment")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%)",
+          border: "2px solid #3b82f6",
+          padding: "12px",
+          borderRadius: "10px",
+          marginBottom: "10px",
+        }}>
+          <strong style={{ color: "#1e40af", fontSize: "16px" }}>💯 Overall Assessment</strong>
+        </div>
+      );
+    }
+
+    // Skin Health Score
+    if (cleanLine.includes("Skin Health Score")) {
+      const score = cleanLine.match(/(\d+)\/100/)?.[1] || "0";
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+          color: "white",
+          padding: "20px",
+          borderRadius: "15px",
+          marginBottom: "16px",
+          textAlign: "center",
+          fontSize: "22px",
+          fontWeight: "800",
+          boxShadow: "0 6px 20px rgba(16, 185, 129, 0.4)"
+        }}>
+          💯 Skin Health Score: {score}/100
+        </div>
+      );
+    }
+
+    // Excellent News
+    if (cleanLine.includes("Excellent News")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+          border: "2px solid #10b981",
+          padding: "14px",
+          borderRadius: "10px",
+          marginBottom: "10px",
+        }}>
+          <strong style={{ color: "#065f46", fontSize: "16px" }}>✨ Excellent News!</strong>
+        </div>
+      );
+    }
+
+    // My Personal Recommendations
+    if (cleanLine.includes("My Personal Recommendations")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
+          border: "2px solid #10b981",
+          padding: "12px",
+          borderRadius: "10px",
+          marginBottom: "10px",
+        }}>
+          <strong style={{ color: "#065f46", fontSize: "16px" }}>💡 My Personal Recommendations</strong>
+        </div>
+      );
+    }
+
+    // Recommendation items
+    if (cleanLine.startsWith("🌿")) {
+      return (
+        <div key={i} style={{
+          background: "#f0fdf4",
+          padding: "10px 14px",
+          borderRadius: "8px",
+          marginBottom: "6px",
+          borderLeft: "4px solid #22c55e",
+          fontSize: "15px"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // Focus areas
+    if (cleanLine.startsWith("👉")) {
+      return (
+        <div key={i} style={{
+          background: "#fefbf2",
+          padding: "10px 14px",
+          borderRadius: "8px",
+          marginBottom: "6px",
+          borderLeft: "4px solid #f59e0b",
+          fontSize: "15px"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // Your Focus messages
+    if (cleanLine.includes("Your Focus:")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
+          color: "white",
+          padding: "16px",
+          borderRadius: "12px",
+          marginTop: "16px",
+          marginBottom: "16px",
+          textAlign: "center",
+          fontWeight: "600",
+          fontSize: "16px",
+          boxShadow: "0 4px 15px rgba(236, 72, 153, 0.4)"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // Questions
+    if (cleanLine.includes("Want to know") || cleanLine.includes("Would you like")) {
+      return (
+        <div key={i} style={{
+          background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
+          border: "2px solid #ec4899",
+          padding: "14px",
+          borderRadius: "12px",
+          marginTop: "16px",
+          textAlign: "center",
+          fontSize: "16px",
+          fontWeight: "600",
+          color: "#be185d"
+        }}>
+          {cleanLine}
+        </div>
+      );
+    }
+
+    // Default - any other line
+    return (
+      <div key={i} style={{ 
+        marginBottom: "8px", 
+        lineHeight: "1.6", 
+        fontSize: "15px",
+        padding: "4px 0"
+      }}>
+        {cleanLine}
+      </div>
+    );
+  });
+};
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -341,19 +822,18 @@ export default function SkincareChatbot({ onClose }) {
   }, [messages, step]);
 
   const handleNext = (value) => {
-    // Validation
     if (step === 0 && !value.trim()) {
-      alert("Please enter your name");
+      alert("Please enter your name so I can personalize your experience");
       return;
     }
     if (step === 1) {
       if (!/^\d+$/.test(value)) {
-        alert("Please enter a valid number");
+        alert("Please enter a valid age (numbers only)");
         return;
       }
       const num = parseInt(value, 10);
       if (num < 14) {
-        alert("Sorry, we do not give advice for children under 14.");
+        alert("I'm sorry, but I can only provide advice to people aged 14 and above for safety reasons.");
         return;
       }
       if (num > 90) {
@@ -363,16 +843,16 @@ export default function SkincareChatbot({ onClose }) {
     }
     if (step === 4) {
       if (!formData.country) {
-        alert("Please select a country");
+        alert("Please select your country so I can give location-specific advice");
         return;
       }
       if (formData.country === "Other" && !formData.otherCountry.trim()) {
-        alert("Please enter your country name");
+        alert("Please tell me which country you're from");
         return;
       }
     }
     if (step === 5 && formData.allergy === "Yes" && !formData.allergyDetails.trim()) {
-      alert("Please provide details about your allergy");
+      alert("Please describe your allergies so I can give you safe recommendations");
       return;
     }
 
@@ -386,7 +866,6 @@ export default function SkincareChatbot({ onClose }) {
     setInputValue("");
   };
 
-  // Updated sendQuery with proper state handling
   const sendQuery = async (currentUserInput) => {
     const userQuery = currentUserInput || formData.query;
     const messageId = Date.now();
@@ -453,7 +932,6 @@ REMEMBER: You are ONLY a skincare and haircare specialist. Never discuss other t
 Tone: Chatty, caring, authentic, focused on beauty only 💖
 `;
 
-    // Add user message with ID immediately
     setMessages((prev) => [...prev, { 
       id: messageId,
       sender: "user", 
@@ -486,22 +964,20 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
     setLoading(false);
   };
 
-  // ✅ MOVE useCallback INSIDE the component
   const debouncedSendQuery = useCallback(
     debounce((input) => {
       sendQuery(input);
     }, 500),
-    [] // Dependencies
+    []
   );
 
-  // ✅ FIXED event handlers - now inside component with access to state
   const handleSendClick = () => {
     const currentInput = inputValue.trim();
     if (currentInput !== "") {
       if (step < keys.length - 1) {
         handleNext(currentInput);
       } else {
-        debouncedSendQuery(currentInput); // Use the memoized version
+        debouncedSendQuery(currentInput);
       }
     }
   };
@@ -514,7 +990,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
         if (step < keys.length - 1) {
           handleNext(currentInput);
         } else {
-          debouncedSendQuery(currentInput); // Use the memoized version
+          debouncedSendQuery(currentInput);
         }
       }
     }
@@ -522,7 +998,6 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
-      {/* Messages with beautified responses */}
       <div
         style={{
           flex: 1,
@@ -530,8 +1005,8 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
           padding: "1rem",
           background: "#fdf2f8",
           borderRadius: "8px",
-          paddingBottom: "80px", // Space for input area
-          WebkitOverflowScrolling: "touch" // Smooth scrolling on mobile
+          paddingBottom: "80px",
+          WebkitOverflowScrolling: "touch"
         }}
       >
         {messages.map((msg, idx) => (
@@ -546,9 +1021,24 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               color: msg.sender === "user" ? "white" : "#374151",
               marginLeft: msg.sender === "user" ? "auto" : "0",
               lineHeight: "1.6",
-              whiteSpace: "pre-line", // Preserves line breaks
+              whiteSpace: "pre-line",
             }}
           >
+            {/* Show uploaded image if exists */}
+            {msg.image && (
+              <img 
+                src={msg.image}
+                alt="Uploaded"
+                style={{
+                  width: "100%",
+                  maxWidth: "min(200px, 90vw)",
+                width: "100%",
+                  borderRadius: "8px",
+                  marginBottom: "8px"
+                }}
+              />
+            )}
+            
             {msg.sender === "bot" ? beautifyResponse(msg.text) : msg.text}
             {msg.sender === 'bot' && (
               <MessageFeedback 
@@ -559,7 +1049,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
           </div>
         ))}
 
-        {/* ALL STEPS INCLUDED */}
+        {/* ALL STEPS INCLUDED - OPTIMIZED UX */}
         {step === 0 && (
           <div
             style={{
@@ -569,7 +1059,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            Hi! 😊 I'm Tanya, your skincare assistant. What's your name?
+            Hi there! 😊 I'm Tanya, your friendly skincare assistant. Can you please tell me your name so I can personalize your skincare advice?
           </div>
         )}
 
@@ -582,7 +1072,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            Nice to meet you, {formData.name}! How old are you?
+            Nice to meet you, {formData.name}! 💖 To give you age-appropriate skincare advice, could you please tell me how old you are(Age)?
           </div>
         )}
 
@@ -595,7 +1085,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Got it! What's your gender?</p>
+            <p style={{ marginBottom: "1rem" }}>Perfect! Now, could you please let me know your gender? This helps me recommend the right products and routines for you. 🌸</p>
             <button
               onClick={() => handleNext("Female")}
               style={{
@@ -637,7 +1127,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>What's your skin type?</p>
+            <p style={{ marginBottom: "1rem" }}>Great! Now, what's your skin type? If you're not sure, choose the one that sounds most like your skin. ✨</p>
             {["Normal", "Dry", "Oily", "Combination", "Sensitive"].map(
               (type) => (
                 <label
@@ -648,7 +1138,11 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                     gap: "0.5rem",
                     padding: "0.5rem",
                     cursor: "pointer",
+                    borderRadius: "4px",
+                    transition: "background 0.2s",
                   }}
+                  onMouseEnter={(e) => e.target.style.background = "#f9f9f9"}
+                  onMouseLeave={(e) => e.target.style.background = "transparent"}
                 >
                   <input
                     type="radio"
@@ -656,7 +1150,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                     value={type}
                     onChange={() => handleNext(type)}
                   />
-                  <span>{type}</span>
+                  <span>{type} skin</span>
                 </label>
               )
             )}
@@ -672,7 +1166,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Which country are you in? 🌏</p>
+            <p style={{ marginBottom: "1rem" }}>Almost done! Which country are you in? This helps me suggest products that are easily available to you. 🌏</p>
             <select
               style={{
                 width: "100%",
@@ -680,6 +1174,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                 border: "1px solid #ccc",
                 borderRadius: "8px",
                 marginBottom: "1rem",
+                fontSize: "16px",
               }}
               value={formData.country}
               onChange={(e) =>
@@ -689,24 +1184,25 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                 }))
               }
             >
-              <option value="">-- Select your country --</option>
+              <option value="">-- Please select your country --</option>
               <option value="India">🇮🇳 India</option>
               <option value="Pakistan">🇵🇰 Pakistan</option>
               <option value="Bangladesh">🇧🇩 Bangladesh</option>
               <option value="Nepal">🇳🇵 Nepal</option>
               <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
-              <option value="Other">🌍 Other</option>
+              <option value="Other">🌍 Other country</option>
             </select>
             {formData.country === "Other" && (
               <input
                 type="text"
-                placeholder="Please enter your country"
+                placeholder="Please tell me your country name"
                 style={{
                   width: "100%",
                   padding: "0.75rem",
                   border: "1px solid #ccc",
                   borderRadius: "8px",
                   marginBottom: "1rem",
+                  fontSize: "16px",
                 }}
                 value={formData.otherCountry}
                 onChange={(e) =>
@@ -733,9 +1229,11 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                 border: "none",
                 borderRadius: "8px",
                 cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "500",
               }}
             >
-              Next
+              Continue
             </button>
           </div>
         )}
@@ -749,7 +1247,7 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Do you have any allergies? 🤔</p>
+            <p style={{ marginBottom: "1rem" }}>Last question! Do you have any known allergies to skincare or haircare products? This is important for your safety. 🤔</p>
             <div
               style={{
                 display: "flex",
@@ -771,9 +1269,10 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
+                  fontSize: "16px",
                 }}
               >
-                No
+                No, I don't have any known allergies
               </button>
               <button
                 onClick={() =>
@@ -787,22 +1286,24 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
+                  fontSize: "16px",
                 }}
               >
-                Yes
+                Yes, I have allergies
               </button>
             </div>
             {formData.allergy === "Yes" && (
               <>
                 <input
                   type="text"
-                  placeholder="Please describe your allergy"
+                  placeholder="Please describe what you're allergic to (e.g., fragrances, specific ingredients)"
                   style={{
                     width: "100%",
                     padding: "0.75rem",
                     border: "1px solid #ccc",
                     borderRadius: "8px",
                     marginBottom: "1rem",
+                    fontSize: "16px",
                   }}
                   value={formData.allergyDetails}
                   onChange={(e) =>
@@ -822,16 +1323,19 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                     border: "none",
                     borderRadius: "8px",
                     cursor: "pointer",
+                    fontSize: "16px",
+                    fontWeight: "500",
                   }}
                 >
-                  Next
+                  Continue
                 </button>
               </>
             )}
           </div>
         )}
 
-        {step === 6 && (
+        {/* ✨ UPDATED STEP 6 WITH MODEL LOADING STATUS */}
+        {step === 6 && messages.length === 0 && (
           <div
             style={{
               background: "white",
@@ -840,7 +1344,102 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               marginBottom: "1rem",
             }}
           >
-            Tell me about your skincare or haircare concern 💬
+            <p style={{ marginBottom: "12px" }}>Great! Now I can help you with skincare and haircare. What's your question?</p>
+            
+            {/* Face Analysis Button */}
+            <button
+              onClick={() => setShowImageUpload(true)}
+              disabled={!modelsLoaded}
+              style={{
+                width: "100%",
+                padding: "12px",
+                background: modelsLoaded ? 
+                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" : 
+                  "#d1d5db",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: modelsLoaded ? "pointer" : "not-allowed",
+                fontSize: "16px",
+                fontWeight: "500",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                opacity: modelsLoaded ? 1 : 0.6
+              }}
+            >
+              📸 {modelsLoaded ? 'Scan My Face for Age & Problems' : 'Loading AI Models...'}
+            </button>
+            
+            {!modelsLoaded && (
+              <p style={{ fontSize: "12px", color: "#666", textAlign: "center", marginTop: "8px" }}>
+                AI models are loading in the background. This may take a few seconds...
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Image upload interface */}
+        {showImageUpload && (
+          <div style={{
+            background: "white",
+            padding: "1rem",
+            borderRadius: "8px",
+            marginBottom: "1rem",
+            border: "2px dashed #ec4899"
+          }}>
+            <h4 style={{ marginBottom: "12px", color: "#333", textAlign: "center" }}>📸 Upload Your Face Photo</h4>
+            <p style={{ fontSize: "14px", color: "#666", marginBottom: "16px", textAlign: "center" }}>
+              Take a clear photo of your face and I'll tell you your skin age and any problems I notice.
+            </p>
+            
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+              id="face-upload"
+            />
+            
+            <div style={{ display: "flex", gap: "8px" }}>
+              <label 
+                htmlFor="face-upload"
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  background: "#ec4899",
+                  color: "white",
+                  textAlign: "center",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px"
+                }}
+              >
+                <FiCamera size={18} />
+                Upload Photo
+              </label>
+              
+              <button
+                onClick={() => setShowImageUpload(false)}
+                style={{
+                  padding: "12px 16px",
+                  background: "#6b7280",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "16px"
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
 
@@ -857,18 +1456,54 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
           </div>
         )}
 
+        {/* Show analyzing status */}
+        {imageAnalyzing && (
+          <div
+            style={{
+              background: "white",
+              padding: "1rem",
+              borderRadius: "8px",
+              color: "#6b7280",
+              textAlign: "center"
+            }}
+          >
+            <div style={{ fontSize: "24px", marginBottom: "8px" }}>🔍</div>
+            <p>Analyzing your face photo with AI...</p>
+          </div>
+        )}
+
+        {/* ✨ SHOW MODEL LOADING STATUS */}
+        {!modelsLoaded && step === 6 && (
+          <div
+            style={{
+              background: "white",
+              padding: "1rem",
+              borderRadius: "8px",
+              color: "#6b7280",
+              textAlign: "center"
+            }}
+          >
+            <div style={{ fontSize: "24px", marginBottom: "8px" }}>🤖</div>
+            <p>Loading AI models for face analysis...</p>
+            <div style={{ fontSize: "12px", marginTop: "8px" }}>
+              This happens once and may take 10-30 seconds depending on your internet speed.
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {/* RESPONSIVE ALIGNED INPUT - FIXED VERSION */}
       {step !== 2 &&
         step !== 3 &&
         step !== 4 &&
         step !== 5 &&
-        !loading && (
+        !loading &&
+        !imageAnalyzing && (
           <div style={{
-            position: "absolute",  // Changed from "fixed"
+            position: "sticky",
             bottom: "0",
+            zIndex: 1000,
             left: "0",
             right: "0",
             padding: "12px",
@@ -880,15 +1515,43 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
             minHeight: "60px",
             boxSizing: "border-box"
           }}>
-            {/* Input Field */}
+            {/* Camera Button */}
+            {step === 6 && (
+              <button
+                onClick={() => setShowImageUpload(true)}
+                disabled={!modelsLoaded}
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  minWidth: "44px",
+                  background: modelsLoaded ? "#10b981" : "#d1d5db",
+                  border: "none",
+                  borderRadius: "22px",
+                  color: "white",
+                  cursor: modelsLoaded ? "pointer" : "not-allowed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "18px",
+                  flexShrink: 0,
+                  opacity: modelsLoaded ? 1 : 0.6
+                }}
+              >
+                📷
+              </button>
+            )}
+
             <input
               type="text"
-              placeholder="Ask me about skincare..."
+              placeholder={step === 0 ? "Type your name here..." : 
+                          step === 1 ? "Enter your age..." :
+                          step === 6 ? "Ask me about skincare, haircare, acne, or any beauty concern..." :
+                          "Type your message..."}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyPress}
               style={{
-                flex: 1,  // Takes remaining space
+                flex: 1,
                 padding: "12px 16px",
                 border: "2px solid #ec4899",
                 borderRadius: "20px",
@@ -900,7 +1563,6 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
               }}
             />
 
-            {/* Send Button */}
             <button
               onClick={handleSendClick}
               disabled={!inputValue.trim()}
