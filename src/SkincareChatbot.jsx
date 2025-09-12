@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FiSend, FiThumbsUp, FiThumbsDown, FiCamera } from "react-icons/fi";
-import * as faceapi from 'face-api.js'; // ✨ Add this import
+import * as faceapi from 'face-api.js';
 
 function TypingDots() {
   const [dots, setDots] = React.useState("");
@@ -238,7 +238,7 @@ export default function SkincareChatbot({ onClose }) {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageAnalyzing, setImageAnalyzing] = useState(false);
   
-  // ✨ NEW: Face-API.js model loading state
+  // ✨ Face-API.js model loading state
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -252,7 +252,7 @@ export default function SkincareChatbot({ onClose }) {
     "query",
   ];
 
-  // ✨ NEW: Load Face-API.js models on component mount
+  // ✨ Load Face-API.js models on component mount
   useEffect(() => {
     const loadModels = async () => {
       try {
@@ -287,7 +287,7 @@ export default function SkincareChatbot({ onClose }) {
     };
   }
 
-  // ✨ NEW: Helper function to generate skin problems based on age
+  // ✨ Helper function to generate skin problems based on age
   const generateSkinProblemsFromAge = (age, gender) => {
     const problems = [];
     
@@ -315,7 +315,7 @@ export default function SkincareChatbot({ onClose }) {
     return problems;
   };
 
-  // ✨ NEW: Helper function to generate recommendations based on age
+  // ✨ Helper function to generate recommendations based on age
   const generateRecommendationsFromAge = (age, gender) => {
     const recommendations = [];
     
@@ -348,7 +348,7 @@ export default function SkincareChatbot({ onClose }) {
     return recommendations;
   };
 
-  // ✨ NEW: Helper function to calculate skin health score
+  // ✨ Helper function to calculate skin health score
   const calculateSkinHealthScore = (age, detectionScore) => {
     let score = detectionScore;
     
@@ -361,91 +361,77 @@ export default function SkincareChatbot({ onClose }) {
     return Math.min(100, Math.max(60, score));
   };
 
-  // ✅ COMPLETE FIX: Update your analyzeFaceImage function with this corrected version
-const analyzeFaceImage = async (file) => {
-  if (!modelsLoaded) {
-    alert('AI models are still loading. Please wait a moment and try again.');
-    return;
-  }
-
-  setImageAnalyzing(true);
-  
-  const imageUrl = URL.createObjectURL(file);
-  setUploadedImage(imageUrl);
-  
-  setMessages(prev => [...prev, {
-    id: Date.now(),
-    sender: "user",
-    text: "Please analyze my face photo",
-    image: imageUrl,
-    timestamp: new Date().toISOString()
-  }]);
-
-  try {
-    const img = new Image();
-    img.src = imageUrl;
-    
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-    });
-
-    const detection = await faceapi
-      .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withAgeAndGender();
-
-    if (!detection) {
-      throw new Error('No face detected');
+  // ✨ Face analysis function
+  const analyzeFaceImage = async (file) => {
+    if (!modelsLoaded) {
+      alert('AI models are still loading. Please wait a moment and try again.');
+      return;
     }
 
-    // ✅ EXTRACT AGE CORRECTLY
-    const age = Math.round(detection.age);
-    const gender = detection.gender;
-    const genderConfidence = Math.round(detection.genderProbability * 100);
-    const faceScore = Math.round(detection.detection.score * 100);
+    setImageAnalyzing(true);
     
-    const skinProblems = generateSkinProblemsFromAge(age, gender);
-    const recommendations = generateRecommendationsFromAge(age, gender);
-    const skinHealthScore = calculateSkinHealthScore(age, faceScore);
+    const imageUrl = URL.createObjectURL(file);
+    setUploadedImage(imageUrl);
+    
+    setMessages(prev => [...prev, {
+      id: Date.now(),
+      sender: "user",
+      text: "Please analyze my face photo",
+      image: imageUrl,
+      timestamp: new Date().toISOString()
+    }]);
 
-const detectedAge = Math.round(detection.age);
-const userRealAge = parseInt(formData.age); // From user input
-const ageDifference = detectedAge - userRealAge;
+    try {
+      const img = new Image();
+      img.src = imageUrl;
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
 
-// Generate age comparison message with better styling and emojis
-let ageComparison = '';
-let ageComparisonEmoji = '';
-let ageComparisonColor = '';
+      const detection = await faceapi
+        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withAgeAndGender();
 
-if (Math.abs(ageDifference) <= 2) {
-  ageComparison = `🎯 **Perfect Match!** The AI detected your age exactly right!`;
-  ageComparisonEmoji = '🎯';
-  ageComparisonColor = '#10b981'; // Green
-} else if (ageDifference < -5) {
-  ageComparison = `🌟 **Incredible!** You look ${Math.abs(ageDifference)} years younger! Your skincare routine is working amazingly!`;
-  ageComparisonEmoji = '🌟';
-  ageComparisonColor = '#059669'; // Darker green
-} else if (ageDifference < -3) {
-  ageComparison = `✨ **Fantastic!** You look ${Math.abs(ageDifference)} years younger than your actual age!`;
-  ageComparisonEmoji = '✨';
-  ageComparisonColor = '#10b981'; // Green
-} else if (ageDifference > 5) {
-  ageComparison = `⚠️ **Skincare Focus Needed:** You appear ${ageDifference} years older. Let's create a targeted routine to help you look your age!`;
-  ageComparisonEmoji = '⚠️';
-  ageComparisonColor = '#dc2626'; // Red
-} else if (ageDifference > 3) {
-  ageComparison = `🔧 **Room for Improvement:** You appear ${ageDifference} years older. Some skincare adjustments could help!`;
-  ageComparisonEmoji = '🔧';
-  ageComparisonColor = '#f59e0b'; // Orange
-} else {
-  ageComparison = `💫 **Pretty Good!** Very close to your actual age!`;
-  ageComparisonEmoji = '💫';
-  ageComparisonColor = '#8b5cf6'; // Purple
-}
+      if (!detection) {
+        throw new Error('No face detected');
+      }
 
-// ✅ ENHANCED: Beautiful analysis text with better structure
-const analysisText = `🎉 **Face Analysis Complete!**
+      // ✅ Extract age correctly
+      const age = Math.round(detection.age);
+      const gender = detection.gender;
+      const genderConfidence = Math.round(detection.genderProbability * 100);
+      const faceScore = Math.round(detection.detection.score * 100);
+      
+      const skinProblems = generateSkinProblemsFromAge(age, gender);
+      const recommendations = generateRecommendationsFromAge(age, gender);
+      const skinHealthScore = calculateSkinHealthScore(age, faceScore);
+
+      const detectedAge = Math.round(detection.age);
+      const userRealAge = parseInt(formData.age);
+      const ageDifference = detectedAge - userRealAge;
+
+      // Generate age comparison message
+      let ageComparison = '';
+
+      if (Math.abs(ageDifference) <= 2) {
+        ageComparison = `🎯 **Perfect Match!** The AI detected your age exactly right!`;
+      } else if (ageDifference < -5) {
+        ageComparison = `🌟 **Incredible!** You look ${Math.abs(ageDifference)} years younger! Your skincare routine is working amazingly!`;
+      } else if (ageDifference < -3) {
+        ageComparison = `✨ **Fantastic!** You look ${Math.abs(ageDifference)} years younger than your actual age!`;
+      } else if (ageDifference > 5) {
+        ageComparison = `⚠️ **Skincare Focus Needed:** You appear ${ageDifference} years older. Let's create a targeted routine to help you look your age!`;
+      } else if (ageDifference > 3) {
+        ageComparison = `🔧 **Room for Improvement:** You appear ${ageDifference} years older. Some skincare adjustments could help!`;
+      } else {
+        ageComparison = `💫 **Pretty Good!** Very close to your actual age!`;
+      }
+
+      // Generate analysis text
+      const analysisText = `🎉 **Face Analysis Complete!**
 
 📊 **Your Age Analysis:**
 👤 Your Real Age: ${userRealAge} years old
@@ -478,21 +464,20 @@ ${ageDifference > 3 ?
   'Would you like specific DIY remedies for any of these concerns? 💖'
 }`;
 
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: "bot",
+        text: analysisText,
+        timestamp: new Date().toISOString()
+      }]);
 
-    setMessages(prev => [...prev, {
-      id: Date.now() + 1,
-      sender: "bot",
-      text: analysisText,
-      timestamp: new Date().toISOString()
-    }]);
-
-  } catch (error) {
-    console.error('Face analysis error:', error);
-    
-    let errorMessage = `Sorry ${formData.name}, I couldn't analyze your photo. `;
-    
-    if (error.message === 'No face detected') {
-      errorMessage += `No face was detected. Please try again with:
+    } catch (error) {
+      console.error('Face analysis error:', error);
+      
+      let errorMessage = `Sorry ${formData.name}, I couldn't analyze your photo. `;
+      
+      if (error.message === 'No face detected') {
+        errorMessage += `No face was detected. Please try again with:
 
 📸 Photo Tips:
 • Face clearly visible and well-lit
@@ -501,23 +486,23 @@ ${ageDifference > 3 ?
 • Avoid heavy shadows
 
 Feel free to ask any skincare questions! 😊`;
-    } else {
-      errorMessage += `Please try again with a clear, well-lit face photo, or ask me any skincare questions! 💕`;
+      } else {
+        errorMessage += `Please try again with a clear, well-lit face photo, or ask me any skincare questions! 💕`;
+      }
+
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: "bot",
+        text: errorMessage,
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
+      setImageAnalyzing(false);
+      setShowImageUpload(false);
     }
+  };
 
-    setMessages(prev => [...prev, {
-      id: Date.now() + 1,
-      sender: "bot",
-      text: errorMessage,
-      timestamp: new Date().toISOString()
-    }]);
-  } finally {
-    setImageAnalyzing(false);
-    setShowImageUpload(false);
-  }
-};
-
-  // ✨ UPDATED: Handle image upload (add model loading check)
+  // ✨ Handle image upload
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -540,278 +525,275 @@ Feel free to ask any skincare questions! 😊`;
     analyzeFaceImage(file);
   };
 
-const beautifyResponse = (text) => {
-  if (!text) return text;
+  const beautifyResponse = (text) => {
+    if (!text) return text;
 
-  // ✅ FIXED: Better text processing for multiline content
-  const lines = text.split('\n').filter(line => line.trim() !== '');
+    const lines = text.split('\n').filter(line => line.trim() !== '');
 
-  return lines.map((line, i) => {
-    const trimmed = line.trim();
-    if (!trimmed) return null;
+    return lines.map((line, i) => {
+      const trimmed = line.trim();
+      if (!trimmed) return null;
 
-    // Remove ** markdown symbols
-    const cleanLine = trimmed.replace(/\*\*/g, '');
+      const cleanLine = trimmed.replace(/\*\*/g, '');
 
-    // Face Analysis Complete
-    if (cleanLine.includes("Face Analysis Complete")) {
+      // Face Analysis Complete
+      if (cleanLine.includes("Face Analysis Complete")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            padding: "16px",
+            borderRadius: "16px",
+            marginBottom: "16px",
+            textAlign: "center",
+            fontWeight: "700",
+            fontSize: "18px",
+            boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)"
+          }}>
+            🎉 Face Analysis Complete!
+          </div>
+        );
+      }
+
+      // Age Analysis header
+      if (cleanLine.includes("Your Age Analysis")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%)",
+            border: "2px solid #3b82f6",
+            padding: "14px",
+            borderRadius: "12px",
+            marginBottom: "12px",
+          }}>
+            <strong style={{ color: "#1e40af", fontSize: "16px" }}>📊 Your Age Analysis</strong>
+          </div>
+        );
+      }
+
+      // Real Age
+      if (cleanLine.includes("Real Age:")) {
+        return (
+          <div key={i} style={{
+            background: "#f8fafc",
+            border: "2px solid #e2e8f0",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "6px",
+            fontSize: "16px",
+            fontWeight: "600",
+            color: "#475569"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // AI Detected Age
+      if (cleanLine.includes("AI Detected Age:")) {
+        return (
+          <div key={i} style={{
+            background: "#f1f5f9",
+            border: "2px solid #94a3b8",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            fontSize: "16px",
+            fontWeight: "600",
+            color: "#475569"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // Age comparison results
+      if (cleanLine.includes("Incredible!")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+            border: "3px solid #059669",
+            padding: "20px",
+            borderRadius: "15px",
+            marginBottom: "20px",
+            fontSize: "18px",
+            fontWeight: "700",
+            color: "#047857",
+            textAlign: "center",
+            boxShadow: "0 8px 25px rgba(5, 150, 105, 0.4)"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      if (cleanLine.includes("Perfect Match!")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
+            border: "3px solid #10b981",
+            padding: "18px",
+            borderRadius: "15px",
+            marginBottom: "18px",
+            fontSize: "17px",
+            fontWeight: "700",
+            color: "#047857",
+            textAlign: "center",
+            boxShadow: "0 6px 20px rgba(16, 185, 129, 0.3)"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // Overall Assessment
+      if (cleanLine.includes("Overall Assessment")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%)",
+            border: "2px solid #3b82f6",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "10px",
+          }}>
+            <strong style={{ color: "#1e40af", fontSize: "16px" }}>💯 Overall Assessment</strong>
+          </div>
+        );
+      }
+
+      // Skin Health Score
+      if (cleanLine.includes("Skin Health Score")) {
+        const score = cleanLine.match(/(\d+)\/100/)?.[1] || "0";
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            color: "white",
+            padding: "20px",
+            borderRadius: "15px",
+            marginBottom: "16px",
+            textAlign: "center",
+            fontSize: "22px",
+            fontWeight: "800",
+            boxShadow: "0 6px 20px rgba(16, 185, 129, 0.4)"
+          }}>
+            💯 Skin Health Score: {score}/100
+          </div>
+        );
+      }
+
+      // Excellent News
+      if (cleanLine.includes("Excellent News")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+            border: "2px solid #10b981",
+            padding: "14px",
+            borderRadius: "10px",
+            marginBottom: "10px",
+          }}>
+            <strong style={{ color: "#065f46", fontSize: "16px" }}>✨ Excellent News!</strong>
+          </div>
+        );
+      }
+
+      // My Personal Recommendations
+      if (cleanLine.includes("My Personal Recommendations")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
+            border: "2px solid #10b981",
+            padding: "12px",
+            borderRadius: "10px",
+            marginBottom: "10px",
+          }}>
+            <strong style={{ color: "#065f46", fontSize: "16px" }}>💡 My Personal Recommendations</strong>
+          </div>
+        );
+      }
+
+      // Recommendation items
+      if (cleanLine.startsWith("🌿")) {
+        return (
+          <div key={i} style={{
+            background: "#f0fdf4",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            marginBottom: "6px",
+            borderLeft: "4px solid #22c55e",
+            fontSize: "15px"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // Focus areas
+      if (cleanLine.startsWith("👉")) {
+        return (
+          <div key={i} style={{
+            background: "#fefbf2",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            marginBottom: "6px",
+            borderLeft: "4px solid #f59e0b",
+            fontSize: "15px"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // Your Focus messages
+      if (cleanLine.includes("Your Focus:")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
+            color: "white",
+            padding: "16px",
+            borderRadius: "12px",
+            marginTop: "16px",
+            marginBottom: "16px",
+            textAlign: "center",
+            fontWeight: "600",
+            fontSize: "16px",
+            boxShadow: "0 4px 15px rgba(236, 72, 153, 0.4)"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // Questions
+      if (cleanLine.includes("Want to know") || cleanLine.includes("Would you like")) {
+        return (
+          <div key={i} style={{
+            background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
+            border: "2px solid #ec4899",
+            padding: "14px",
+            borderRadius: "12px",
+            marginTop: "16px",
+            textAlign: "center",
+            fontSize: "16px",
+            fontWeight: "600",
+            color: "#be185d"
+          }}>
+            {cleanLine}
+          </div>
+        );
+      }
+
+      // Default - any other line
       return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          color: "white",
-          padding: "16px",
-          borderRadius: "16px",
-          marginBottom: "16px",
-          textAlign: "center",
-          fontWeight: "700",
-          fontSize: "18px",
-          boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)"
-        }}>
-          🎉 Face Analysis Complete!
-        </div>
-      );
-    }
-
-    // Age Analysis header
-    if (cleanLine.includes("Your Age Analysis")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%)",
-          border: "2px solid #3b82f6",
-          padding: "14px",
-          borderRadius: "12px",
-          marginBottom: "12px",
-        }}>
-          <strong style={{ color: "#1e40af", fontSize: "16px" }}>📊 Your Age Analysis</strong>
-        </div>
-      );
-    }
-
-    // Real Age
-    if (cleanLine.includes("Real Age:")) {
-      return (
-        <div key={i} style={{
-          background: "#f8fafc",
-          border: "2px solid #e2e8f0",
-          padding: "12px",
-          borderRadius: "10px",
-          marginBottom: "6px",
-          fontSize: "16px",
-          fontWeight: "600",
-          color: "#475569"
+        <div key={i} style={{ 
+          marginBottom: "8px", 
+          lineHeight: "1.6", 
+          fontSize: "15px",
+          padding: "4px 0"
         }}>
           {cleanLine}
         </div>
       );
-    }
-
-    // AI Detected Age
-    if (cleanLine.includes("AI Detected Age:")) {
-      return (
-        <div key={i} style={{
-          background: "#f1f5f9",
-          border: "2px solid #94a3b8",
-          padding: "12px",
-          borderRadius: "10px",
-          marginBottom: "16px",
-          fontSize: "16px",
-          fontWeight: "600",
-          color: "#475569"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    // Age comparison results
-    if (cleanLine.includes("Incredible!")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-          border: "3px solid #059669",
-          padding: "20px",
-          borderRadius: "15px",
-          marginBottom: "20px",
-          fontSize: "18px",
-          fontWeight: "700",
-          color: "#047857",
-          textAlign: "center",
-          boxShadow: "0 8px 25px rgba(5, 150, 105, 0.4)"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    if (cleanLine.includes("Perfect Match!")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
-          border: "3px solid #10b981",
-          padding: "18px",
-          borderRadius: "15px",
-          marginBottom: "18px",
-          fontSize: "17px",
-          fontWeight: "700",
-          color: "#047857",
-          textAlign: "center",
-          boxShadow: "0 6px 20px rgba(16, 185, 129, 0.3)"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    // Overall Assessment
-    if (cleanLine.includes("Overall Assessment")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%)",
-          border: "2px solid #3b82f6",
-          padding: "12px",
-          borderRadius: "10px",
-          marginBottom: "10px",
-        }}>
-          <strong style={{ color: "#1e40af", fontSize: "16px" }}>💯 Overall Assessment</strong>
-        </div>
-      );
-    }
-
-    // Skin Health Score
-    if (cleanLine.includes("Skin Health Score")) {
-      const score = cleanLine.match(/(\d+)\/100/)?.[1] || "0";
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-          color: "white",
-          padding: "20px",
-          borderRadius: "15px",
-          marginBottom: "16px",
-          textAlign: "center",
-          fontSize: "22px",
-          fontWeight: "800",
-          boxShadow: "0 6px 20px rgba(16, 185, 129, 0.4)"
-        }}>
-          💯 Skin Health Score: {score}/100
-        </div>
-      );
-    }
-
-    // Excellent News
-    if (cleanLine.includes("Excellent News")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-          border: "2px solid #10b981",
-          padding: "14px",
-          borderRadius: "10px",
-          marginBottom: "10px",
-        }}>
-          <strong style={{ color: "#065f46", fontSize: "16px" }}>✨ Excellent News!</strong>
-        </div>
-      );
-    }
-
-    // My Personal Recommendations
-    if (cleanLine.includes("My Personal Recommendations")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
-          border: "2px solid #10b981",
-          padding: "12px",
-          borderRadius: "10px",
-          marginBottom: "10px",
-        }}>
-          <strong style={{ color: "#065f46", fontSize: "16px" }}>💡 My Personal Recommendations</strong>
-        </div>
-      );
-    }
-
-    // Recommendation items
-    if (cleanLine.startsWith("🌿")) {
-      return (
-        <div key={i} style={{
-          background: "#f0fdf4",
-          padding: "10px 14px",
-          borderRadius: "8px",
-          marginBottom: "6px",
-          borderLeft: "4px solid #22c55e",
-          fontSize: "15px"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    // Focus areas
-    if (cleanLine.startsWith("👉")) {
-      return (
-        <div key={i} style={{
-          background: "#fefbf2",
-          padding: "10px 14px",
-          borderRadius: "8px",
-          marginBottom: "6px",
-          borderLeft: "4px solid #f59e0b",
-          fontSize: "15px"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    // Your Focus messages
-    if (cleanLine.includes("Your Focus:")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
-          color: "white",
-          padding: "16px",
-          borderRadius: "12px",
-          marginTop: "16px",
-          marginBottom: "16px",
-          textAlign: "center",
-          fontWeight: "600",
-          fontSize: "16px",
-          boxShadow: "0 4px 15px rgba(236, 72, 153, 0.4)"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    // Questions
-    if (cleanLine.includes("Want to know") || cleanLine.includes("Would you like")) {
-      return (
-        <div key={i} style={{
-          background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
-          border: "2px solid #ec4899",
-          padding: "14px",
-          borderRadius: "12px",
-          marginTop: "16px",
-          textAlign: "center",
-          fontSize: "16px",
-          fontWeight: "600",
-          color: "#be185d"
-        }}>
-          {cleanLine}
-        </div>
-      );
-    }
-
-    // Default - any other line
-    return (
-      <div key={i} style={{ 
-        marginBottom: "8px", 
-        lineHeight: "1.6", 
-        fontSize: "15px",
-        padding: "4px 0"
-      }}>
-        {cleanLine}
-      </div>
-    );
-  });
-};
-
+    });
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -821,115 +803,81 @@ const beautifyResponse = (text) => {
     scrollToBottom();
   }, [messages, step]);
 
-  const handleNext = (value) => {
-    if (step === 0 && !value.trim()) {
-      alert("Please enter your name so I can personalize your experience");
-      return;
-    }
-    if (step === 1) {
-      if (!/^\d+$/.test(value)) {
-        alert("Please enter a valid age (numbers only)");
-        return;
-      }
-      const num = parseInt(value, 10);
-      if (num < 14) {
-        alert("I'm sorry, but I can only provide advice to people aged 14 and above for safety reasons.");
-        return;
-      }
-      if (num > 90) {
-        alert("Please enter a valid age between 14 and 90");
-        return;
-      }
-    }
-    if (step === 4) {
-      if (!formData.country) {
-        alert("Please select your country so I can give location-specific advice");
-        return;
-      }
-      if (formData.country === "Other" && !formData.otherCountry.trim()) {
-        alert("Please tell me which country you're from");
-        return;
-      }
-    }
-    if (step === 5 && formData.allergy === "Yes" && !formData.allergyDetails.trim()) {
-      alert("Please describe your allergies so I can give you safe recommendations");
-      return;
-    }
-
-    setFormData((prev) => ({ ...prev, [keys[step]]: value }));
-
-    if (step < keys.length - 1) {
-      setStep(step + 1);
-    } else {
-      sendQuery(value);
-    }
-    setInputValue("");
-  };
-
-  const sendQuery = async (currentUserInput) => {
-    const userQuery = currentUserInput || formData.query;
+  // ✅ FIXED: sendQuery function defined ONLY ONCE in correct scope
+  const sendQuery = async (currentUserInput, form = formData) => {
+    const userQuery = currentUserInput || form.query;
     const messageId = Date.now();
-    
+
     if (!userQuery.trim()) return;
 
+    const payload = { ...form, query: userQuery };
+    console.log("🚀 Sending:", payload);
+
     const prompt = `
-You are Tanya, a Skin and Hair Care Specialist who combines medical expertise with traditional Ayurvedic wisdom. Provide practical skincare and haircare advice with lifestyle recommendations in a casual, approachable way.
+You are Tanya, a skincare and haircare specialist. You mainly give advice on skin, hair, and related women’s health issues (like PCOS, hormonal imbalance, periods, pregnancy-related skin/hair changes). Always clarify that medical questions need a doctor’s consultation. Give practical, caring advice in a short, casual way.
 
-STRICT RULES - ONLY ANSWER THESE TOPICS:
-• Skincare concerns (acne, dark spots, wrinkles, dry/oily skin, etc.)
-• Haircare problems (hair fall, dandruff, hair growth, etc.)
-• Beauty routines and DIY remedies
-• Natural/Ayurvedic treatments for skin and hair
-• Skincare and haircare product recommendations
+ONLY ANSWER THESE TOPICS:
+• Skin concerns (acne, dark spots, wrinkles, dryness, oiliness, sensitivity, etc.)
+• Hair concerns (hair fall, dandruff, thinning, greying/white hair, scalp health, etc.)
+• Beauty routines & DIY remedies
+• Natural/Ayurvedic treatments
+• Product recommendations
 
-IF USER ASKS ABOUT NON-BEAUTY TOPICS (cooking, coding, math, weather, news, etc.), RESPOND WITH:
-"Hi ${formData.name}! I'm your skincare and haircare specialist 🌸 Please ask me about skin concerns, hair problems, beauty routines, or DIY remedies. I'm here to help you glow naturally! 💖"
+IF USER ASKS NON-BEAUTY TOPICS (coding, cooking, math, news, politics, weather, finance, etc.) → reply:
+"Hi ${formData.name || 'Friend'}! I'm your skincare & haircare specialist 🌸 Please ask me about skin concerns, hair problems, beauty routines, or DIY remedies. I'm here to help you glow naturally! 💖"
 
 USER PROFILE:
-• Name: ${formData.name}
-• Age: ${formData.age} years old
-• Gender: ${formData.gender}
-• Skin Type: ${formData.skinType}
-• Location: ${formData.country}
+• Name: ${formData.name || 'Friend'}
+• Age: ${formData.age ? formData.age + ' years old' : 'Not provided'}
+• Gender: ${formData.gender || 'Not provided'}
+• Skin Type: ${formData.skinType || 'Not provided'}
+• Location: ${formData.country || 'Not provided'}
 
 USER QUESTION: "${userQuery}"
 
-COMMUNICATION STYLE:
-• Use simple, modern Hindi-English mix (Hinglish) when natural
-• Be warm, friendly, and supportive — like a caring doctor-friend
-• Keep answers short (max 5–6 sentences)
-• Use emojis sparingly to keep it fun 🌿✨
-• Avoid long essays, focus on quick tips and steps
-• Break replies into easy-to-scan bullet points when needed
-• If user wants more details, offer to explain further
-• IMPORTANT: Reply in the same language/style as the user's question (e.g., Hindi → Hindi, Hinglish → Hinglish, English → English)
+STYLE:
+• Warm, friendly, Hinglish-English mix when natural  
+• Short replies (max 5–6 sentences)  
+• Use emojis lightly (🌿✨💖)  
+• Reply in the same language as the user's question  
+• Use simple bullets (👉, 🌿, ✨) for clarity  
 
-DERMATOLOGICAL APPROACH (ONLY FOR BEAUTY QUESTIONS):
-• Assess their skin/hair concern in a simple way
-• Suggest 2–3 practical solutions (DIY + safe product options)
-• Give **step-by-step routine** in short form
-• Add **one lifestyle/diet tip** if relevant
-• Warn about precautions and when to see a doctor
+RESPONSE STRUCTURE (for beauty Qs):
+- Warm greeting with their name  
+- Quick assessment of concern  
+- 2–3 practical solutions (mix DIY + safe product)  
+- 1 daily routine suggestion (1 line)  
+- 1 lifestyle/diet tip (1 line)  
+- 1 precaution (1 line)  
+- Supportive, encouraging closing  
 
-RESPONSE STRUCTURE (ONLY FOR BEAUTY QUESTIONS):
-- Warm, professional greeting using their name
-- Quick assessment of their concern
-- 2–3 practical solutions (mix of DIY + gentle products)
-- Short daily routine tip in 1–2 lines
-- One lifestyle/diet tip in 1 line
-- Important precaution in 1 line
-- Encouraging, supportive closing
+LANGUAGE RULE:
+• Always reply in the **same language** the user used.  
+• If the user asks in Hindi → reply fully in Hindi.  
+• If the user asks in Hinglish → reply in Hinglish (mix of Hindi + English).  
+• If the user asks in English → reply in English.  
 
-FORMATTING RULES:
-+ Keep replies **short (max 5–6 sentences)**, avoid long sections or headings
-+ Do NOT use "Tip 1/Tip 2" or bold section titles
-+ Use simple bullets (👉, 🌿, ✨) instead of markdown formatting
-+ Replies should feel like a quick chat, not a blog article
-+ Always reply in the same language/style as the user's question
+EXAMPLES:
+User (Hindi): "Mere baal safed ho rahe hain"  
+Assistant (Hindi): "Hi Friend! Safed baal hona aam baat hai, tension mat lo 💖  
+👉 Roz scalp par amla aur bhringraj ka tel lagao  
+👉 Mahine mein ek baar mehndi + shikakai mask lagao  
+👉 Herbal shampoo use karo, chemical wale avoid karo  
+Rozana thoda scalp massage karo 🌿  
+Khana mein iron aur Vitamin B12 zaroor shamil karo  
+Agar baal bahut tezi se safed ho rahe hain to doctor se milo ✨"  
 
-REMEMBER: You are ONLY a skincare and haircare specialist. Never discuss other topics.
+User (English): "I have dandruff"  
+Assistant (English): "Hi Friend! Dandruff is common, don't worry 💖  
+👉 Use a gentle anti-dandruff shampoo 2–3 times a week  
+👉 Apply neem water rinse at home 🌿  
+👉 Keep scalp clean and avoid oily products  
+If itching is severe, see a dermatologist ✨"
 
-Tone: Chatty, caring, authentic, focused on beauty only 💖
+RULES:
+• Always stay on skin/hair/beauty topics  
+• Keep answers chatty, not essay-like  
+• Never ignore short queries (e.g., "pimples", "grey hair") — treat them as valid beauty concerns  
 `;
 
     setMessages((prev) => [...prev, { 
@@ -944,31 +892,97 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
 
     try {
       const aiResponse = await aiProvider.getAIResponse(prompt);
-      setMessages((prev) => [...prev, { 
-        id: messageId + 1,
-        sender: "bot", 
-        text: aiResponse,
-        timestamp: new Date().toISOString()
-      }]);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId + 1,
+          sender: "bot",
+          text: aiResponse || "Sorry, I couldn't generate a response.",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } catch (error) {
       console.error("AI error:", error);
-      const fallbackResponse = aiProvider.getFallbackResponse(userQuery, formData);
-      setMessages((prev) => [...prev, { 
-        id: messageId + 1,
-        sender: "bot", 
-        text: fallbackResponse,
-        timestamp: new Date().toISOString()
-      }]);
-    }
 
-    setLoading(false);
+      const fallbackResponse = aiProvider.getFallbackResponse(
+        prompt || "",   
+        formData || {}  
+      );
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId + 1,
+          sender: "bot",
+          text: fallbackResponse || "Something went wrong, please try again.",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ✅ FIXED: handleNext function (clean, no nested sendQuery)
+  const handleNext = (value) => {
+  if (step === 0 && !value.trim()) {
+    alert("Please enter your name so I can personalize your experience");
+    return;
+  }
+  if (step === 1) {
+    if (!/^\d+$/.test(value)) {
+      alert("Please enter a valid age (numbers only)");
+      return;
+    }
+    const num = parseInt(value, 10);
+    if (num < 14) {
+      alert("I'm sorry, but I can only provide advice to people aged 14 and above for safety reasons.");
+      return;
+    }
+    if (num > 90) {
+      alert("Please enter a valid age between 14 and 90");
+      return;
+    }
+  }
+  if (step === 4) {
+    if (!formData.country) {
+      alert("Please select your country so I can give location-specific advice");
+      return;
+    }
+    if (formData.country === "Other" && !formData.otherCountry.trim()) {
+      alert("Please tell me which country you're from");
+      return;
+    }
+  }
+  if (step === 5 && formData.allergy === "Yes" && !formData.allergyDetails.trim()) {
+    alert("Please describe your allergies so I can give you safe recommendations");
+    return;
+  }
+
+  // ✅ ADD THIS LINE: Clear the input field after each step
+  setInputValue("");
+
+  setFormData((prev) => {
+    const updated = { ...prev, [keys[step]]: value };
+
+    if (step < keys.length - 1) {
+      setStep(step + 1);
+    } else {
+      // ✅ Now sendQuery is accessible from component scope
+      sendQuery(updated.query || value, updated);
+    }
+
+    return updated;
+  });
+};
+
+  // ✅ FIXED: debouncedSendQuery with proper dependency
   const debouncedSendQuery = useCallback(
     debounce((input) => {
       sendQuery(input);
     }, 500),
-    []
+    [sendQuery]
   );
 
   const handleSendClick = () => {
@@ -1032,7 +1046,6 @@ Tone: Chatty, caring, authentic, focused on beauty only 💖
                 style={{
                   width: "100%",
                   maxWidth: "min(200px, 90vw)",
-                width: "100%",
                   borderRadius: "8px",
                   marginBottom: "8px"
                 }}
