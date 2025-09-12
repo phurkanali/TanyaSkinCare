@@ -6,11 +6,8 @@ import { useInView } from "react-intersection-observer";
 import VideosSection from "./VideosSection";
 import SkincareChatbot from "./SkincareChatbot";
 import ErrorBoundary from './ErrorBoundary';
-
-// Add this import with your existing imports
 import { fetchAllSocialStats } from "./services/socialMediaService";
 
-// Add this after your imports, before the stats object
 const SOCIAL_CONFIG = {
   youtubeChannelId: process.env.REACT_APP_YOUTUBE_CHANNEL_ID,
   instagramUsername: process.env.REACT_APP_INSTAGRAM_USERNAME,
@@ -20,30 +17,44 @@ export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
   
-  // NEW: Add these state variables for live stats
   const [stats, setStats] = useState({
-    subscribers: 160,
-    instagram: 54,
-    monthlyViews: 113,
+    subscribers: 200,
+    instagram: 58,
+    monthlyViews: 140,
   });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
 
-  // NEW: Add this function to fetch live stats
+  // --- CACHED FETCH FUNCTION ---
   const fetchLiveStats = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
+      // Check localStorage for cached data
+      const cached = localStorage.getItem("socialStats");
+      const cachedTime = localStorage.getItem("socialStatsTime");
+      const now = new Date().getTime();
+
+      if (cached && cachedTime && now - cachedTime < 5 * 60 * 1000) {
+        // Use cache if less than 5 minutes old
+        const cachedStats = JSON.parse(cached);
+        setStats(cachedStats);
+        setLastUpdated(new Date(parseInt(cachedTime)));
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise, fetch from API
       const socialData = await fetchAllSocialStats(
         SOCIAL_CONFIG.youtubeChannelId,
         SOCIAL_CONFIG.instagramUsername
       );
 
       if (socialData.youtube || socialData.instagram) {
-        setStats(prevStats => ({
-          ...prevStats,
+        const updatedStats = {
+          ...stats,
           ...(socialData.youtube && {
             subscribers: Math.floor(socialData.youtube.subscribers / 1000),
             monthlyViews: Math.floor(socialData.youtube.views / 1000000),
@@ -51,8 +62,13 @@ export default function App() {
           ...(socialData.instagram && {
             instagram: Math.floor(socialData.instagram.followers / 1000),
           })
-        }));
+        };
+        setStats(updatedStats);
         setLastUpdated(new Date());
+
+        // Save to localStorage
+        localStorage.setItem("socialStats", JSON.stringify(updatedStats));
+        localStorage.setItem("socialStatsTime", new Date().getTime());
       } else {
         setError('Unable to fetch live data. Showing cached values.');
       }
@@ -67,21 +83,14 @@ export default function App() {
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
     window.scrollTo(0, 0);
-    
-    // NEW: Fetch live stats on load
     fetchLiveStats();
-    
-    // NEW: Auto-refresh every 2 minutes
-    const interval = setInterval(fetchLiveStats, 120000);
-    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
-      
+
       <main className="flex-1">
-        {/* UPDATE: Pass new props to Hero */}
         <section id="home">
           <Hero 
             stats={stats} 
@@ -98,21 +107,18 @@ export default function App() {
         <DisclaimerSection />
         <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
-      
+
       <Footer />
 
-      {/* FLOATING Chat Button - positioned OUTSIDE footer to ensure proper floating */}
       <button
         onClick={() => setChatOpen(true)}
         aria-label="Open Chatbot"
         className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
-        style={{ position: 'fixed' }} // Force fixed positioning
       >
         💬 Chat
         {!chatOpen && <span className="blink-dot"></span>}
       </button>
 
-      {/* Chat Popup */}
       <ChatbotPopup open={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
@@ -249,6 +255,7 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
     </section>
   );
 }
+
 
 // Stat - UPDATED with loading state
 function Stat({ label, value, suffix, loading }) {
