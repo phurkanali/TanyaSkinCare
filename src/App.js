@@ -7,7 +7,7 @@ import VideosSection from "./VideosSection";
 import SkincareChatbot from "./SkincareChatbot";
 import ErrorBoundary from './ErrorBoundary';
 import { fetchAllSocialStats } from "./services/socialMediaService";
-import AdUnit from "./AdUnit"; 
+import AdUnit from "./AdUnit";
 import 'aos/dist/aos.css';
 
 const SOCIAL_CONFIG = {
@@ -106,7 +106,7 @@ export default function App() {
       <button
         onClick={() => setChatOpen(true)}
         aria-label="Open Chatbot"
-                className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
+        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
         style={{ position: 'fixed' }} // Force fixed positioning
 
       >
@@ -138,7 +138,7 @@ function TopBar({ showShopSection, onChatOpen }) {
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 via-red-400 to-yellow-300 flex items-center justify-center text-white font-bold">TF</div>
           <h1 className="text-lg font-semibold">Tanya Fashion Skincare</h1>
         </div>
-        
+
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-4 text-sm items-center">
           <NavItem to="home" activeTab={activeTab} onTabChange={handleTabChange}>Home</NavItem>
@@ -151,7 +151,7 @@ function TopBar({ showShopSection, onChatOpen }) {
             Chat 💬
           </button>
         </nav>
-        
+
         {/* Mobile Hamburger */}
         <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden focus:outline-none" aria-label="Toggle menu">
           <div className="space-y-1">
@@ -161,7 +161,7 @@ function TopBar({ showShopSection, onChatOpen }) {
           </div>
         </button>
       </div>
-      
+
       {/* Mobile Nav Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white px-4 py-3 space-y-2 animate-slide-down">
@@ -194,9 +194,8 @@ function NavItem({ to, children, onClick, activeTab, onTabChange }) {
       activeClass="nav-active"
       onClick={onClick}
       onSetActive={() => onTabChange(to)}
-      className={`block px-2 py-1 rounded cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-pink-300 ${
-        activeTab === to ? "nav-active" : ""
-      }`}
+      className={`block px-2 py-1 rounded cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-pink-300 ${activeTab === to ? "nav-active" : ""
+        }`}
     >
       {children}
     </Link>
@@ -217,7 +216,7 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
             <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="px-5 py-3 bg-red-600 text-white rounded-lg text-sm shadow hover:bg-red-700">Subscribe on YouTube</a>
             <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="px-5 py-3 bg-pink-500 text-white rounded-lg text-sm shadow hover:bg-pink-600">Follow on Instagram</a>
           </div>
-          
+
           {/* NEW: Enhanced stats section with live data */}
           <div className="mt-8">
             <div className="flex items-center gap-3 mb-4">
@@ -326,12 +325,12 @@ function CollaborationSection() {
         </p>
         <p className="mt-4 text-gray-700">
           📩 Email me at{" "}
-<a 
-  href="mailto:tanyaskincare123@gmail.com" 
-  className="text-pink-600 underline hover:text-pink-700"
->
-  tanyaskincare123@gmail.com
-</a>
+          <a
+            href="mailto:tanyaskincare123@gmail.com"
+            className="text-pink-600 underline hover:text-pink-700"
+          >
+            tanyaskincare123@gmail.com
+          </a>
 
         </p>
         <a href="/Tanya-Media-Kit.pdf" download className="inline-block mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg shadow hover:bg-pink-600">
@@ -363,13 +362,13 @@ function ContactSection() {
         <h3 className="text-3xl font-semibold text-gray-900">Say Hello 👋</h3>
         <p className="text-md text-gray-700 mt-2">
           Have a question, feedback, or just want to say hi? Email me at{" "}
-          <a 
-    href="mailto:tanyaskincare123@gmail.com" 
-    aria-label="Email Tanya Skincare" 
-    className="text-pink-600 underline hover:text-pink-700 transition-colors"
-  >
-    tanyaskincare123@gmail.com
-  </a>
+          <a
+            href="mailto:tanyaskincare123@gmail.com"
+            aria-label="Email Tanya Skincare"
+            className="text-pink-600 underline hover:text-pink-700 transition-colors"
+          >
+            tanyaskincare123@gmail.com
+          </a>
         </p>
       </div>
     </section>
@@ -406,7 +405,7 @@ function ChatbotPopup({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-      <div 
+      <div
         className="bg-white rounded-lg shadow-lg relative animate-fadeIn"
         style={{
           width: '100%',
@@ -418,6 +417,8 @@ function ChatbotPopup({ open, onClose }) {
           flexDirection: 'column'
         }}
       >
+
+
         <button
           onClick={onClose}
           className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
