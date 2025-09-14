@@ -7,6 +7,7 @@ import VideosSection from "./VideosSection";
 import SkincareChatbot from "./SkincareChatbot";
 import ErrorBoundary from './ErrorBoundary';
 import { fetchAllSocialStats } from "./services/socialMediaService";
+import AdUnit from "./AdUnit"; 
 
 const SOCIAL_CONFIG = {
   youtubeChannelId: process.env.REACT_APP_YOUTUBE_CHANNEL_ID,
@@ -18,9 +19,9 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   
   const [stats, setStats] = useState({
-    subscribers: 200,
+    subscribers: 205,
     instagram: 58,
-    monthlyViews: 140,
+    monthlyViews: 144,
   });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -56,12 +57,22 @@ export default function App() {
         const updatedStats = {
           ...stats,
           ...(socialData.youtube && {
-            subscribers: Math.floor(socialData.youtube.subscribers / 1000),
-            monthlyViews: Math.floor(socialData.youtube.views / 1000000),
+            subscribers: Math.max(
+      stats.subscribers, // manual baseline (200 from state)
+      Math.floor(socialData.youtube.subscribers / 1000) // API value
+    ),
+    monthlyViews: Math.max(
+      stats.monthlyViews, // manual baseline (140 from state)
+      Math.floor(socialData.youtube.views / 1000000) // API value
+    ),
           }),
           ...(socialData.instagram && {
-            instagram: Math.floor(socialData.instagram.followers / 1000),
-          })
+  instagram: Math.max(
+    stats.instagram, // 👈 take manual value from state (58)
+    Math.floor(socialData.instagram.followers / 1000) // API value
+  ),
+}),
+
         };
         setStats(updatedStats);
         setLastUpdated(new Date());
@@ -100,7 +111,13 @@ export default function App() {
             error={error}
           />
         </section>
-        <section id="videos"><VideosSection /></section>
+        <section id="videos">
+  <VideosSection />
+  <div className="my-6">
+    <AdUnit slot="1234567890" /> {/* Replace with your Ad Slot ID */}
+  </div>
+</section>
+
         {showShopSection && <section id="shop"><ShopSection /></section>}
         <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
         <section id="collaboration" className="scroll-mt-[80px]"><CollaborationSection /></section>
@@ -108,12 +125,18 @@ export default function App() {
         <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
 
+
+<div className="my-6">
+  <AdUnit slot="0987654321" /> {/* Replace with your Ad Slot ID */}
+</div>
+
       <Footer />
 
-      <button
+        <button
         onClick={() => setChatOpen(true)}
         aria-label="Open Chatbot"
         className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
+        style={{ position: 'fixed' }} // Force fixed positioning
       >
         💬 Chat
         {!chatOpen && <span className="blink-dot"></span>}
@@ -255,7 +278,6 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
     </section>
   );
 }
-
 
 // Stat - UPDATED with loading state
 function Stat({ label, value, suffix, loading }) {
