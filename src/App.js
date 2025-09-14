@@ -111,12 +111,20 @@ export default function App() {
             error={error}
           />
         </section>
+
+{/* Inline ad after Hero */}
+<div className="my-12 flex justify-center" data-aos="fade-up">
+  <AdUnit slot="YOUR_GOOGLE_AD_SLOT_1" />
+</div>
+
+
         <section id="videos">
   <VideosSection />
-  <div className="my-6">
-    <AdUnit slot="1234567890" /> {/* Replace with your Ad Slot ID */}
-  </div>
 </section>
+
+<div className="my-12 flex justify-center" data-aos="fade-up">
+    <AdUnit slot="YOUR_GOOGLE_AD_SLOT_2" /> {/* Replace with your Ad Slot ID */}
+  </div>
 
         {showShopSection && <section id="shop"><ShopSection /></section>}
         <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
@@ -124,11 +132,6 @@ export default function App() {
         <DisclaimerSection />
         <section id="contact" className="scroll-mt-[80px]"><ContactSection /></section>
       </main>
-
-
-<div className="my-6">
-  <AdUnit slot="0987654321" /> {/* Replace with your Ad Slot ID */}
-</div>
 
       <Footer />
 
