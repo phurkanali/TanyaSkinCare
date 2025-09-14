@@ -8,6 +8,7 @@ import SkincareChatbot from "./SkincareChatbot";
 import ErrorBoundary from './ErrorBoundary';
 import { fetchAllSocialStats } from "./services/socialMediaService";
 import AdUnit from "./AdUnit"; 
+import 'aos/dist/aos.css';
 
 const SOCIAL_CONFIG = {
   youtubeChannelId: process.env.REACT_APP_YOUTUBE_CHANNEL_ID,
@@ -17,37 +18,27 @@ const SOCIAL_CONFIG = {
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
-  
-  const [stats, setStats] = useState({
-    subscribers: 205,
-    instagram: 58,
-    monthlyViews: 144,
-  });
+  const [stats, setStats] = useState({ subscribers: 205, instagram: 58, monthlyViews: 144 });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
 
-  // --- CACHED FETCH FUNCTION ---
+  // Fetch & cache social stats
   const fetchLiveStats = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      // Check localStorage for cached data
       const cached = localStorage.getItem("socialStats");
       const cachedTime = localStorage.getItem("socialStatsTime");
       const now = new Date().getTime();
 
       if (cached && cachedTime && now - cachedTime < 5 * 60 * 1000) {
-        // Use cache if less than 5 minutes old
-        const cachedStats = JSON.parse(cached);
-        setStats(cachedStats);
+        setStats(JSON.parse(cached));
         setLastUpdated(new Date(parseInt(cachedTime)));
         setLoading(false);
         return;
       }
 
-      // Otherwise, fetch from API
       const socialData = await fetchAllSocialStats(
         SOCIAL_CONFIG.youtubeChannelId,
         SOCIAL_CONFIG.instagramUsername
@@ -57,27 +48,15 @@ export default function App() {
         const updatedStats = {
           ...stats,
           ...(socialData.youtube && {
-            subscribers: Math.max(
-      stats.subscribers, // manual baseline (200 from state)
-      Math.floor(socialData.youtube.subscribers / 1000) // API value
-    ),
-    monthlyViews: Math.max(
-      stats.monthlyViews, // manual baseline (140 from state)
-      Math.floor(socialData.youtube.views / 1000000) // API value
-    ),
+            subscribers: Math.max(stats.subscribers, Math.floor(socialData.youtube.subscribers / 1000)),
+            monthlyViews: Math.max(stats.monthlyViews, Math.floor(socialData.youtube.views / 1000000)),
           }),
           ...(socialData.instagram && {
-  instagram: Math.max(
-    stats.instagram, // 👈 take manual value from state (58)
-    Math.floor(socialData.instagram.followers / 1000) // API value
-  ),
-}),
-
+            instagram: Math.max(stats.instagram, Math.floor(socialData.instagram.followers / 1000)),
+          }),
         };
         setStats(updatedStats);
         setLastUpdated(new Date());
-
-        // Save to localStorage
         localStorage.setItem("socialStats", JSON.stringify(updatedStats));
         localStorage.setItem("socialStatsTime", new Date().getTime());
       } else {
@@ -92,7 +71,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    AOS.init({ duration: 800, once: true });
+    AOS.init({ duration: 600, once: true });
     window.scrollTo(0, 0);
     fetchLiveStats();
   }, []);
@@ -100,31 +79,19 @@ export default function App() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
-
       <main className="flex-1">
-        <section id="home">
-          <Hero 
-            stats={stats} 
-            loading={loading} 
-            onRefresh={fetchLiveStats}
-            lastUpdated={lastUpdated}
-            error={error}
-          />
-        </section>
+        <section id="home"><Hero stats={stats} loading={loading} lastUpdated={lastUpdated} error={error} /></section>
 
-{/* Inline ad after Hero */}
-<div className="my-12 flex justify-center" data-aos="fade-up">
-  <AdUnit slot="YOUR_GOOGLE_AD_SLOT_1" />
-</div>
+        {/* Ads */}
+        <div className="my-8 flex justify-center" data-aos="fade-up">
+          <AdUnit slot="YOUR_GOOGLE_AD_SLOT_1" />
+        </div>
 
+        <section id="videos"><VideosSection /></section>
 
-        <section id="videos">
-  <VideosSection />
-</section>
-
-<div className="my-12 flex justify-center" data-aos="fade-up">
-    <AdUnit slot="YOUR_GOOGLE_AD_SLOT_2" /> {/* Replace with your Ad Slot ID */}
-  </div>
+        <div className="my-8 flex justify-center" data-aos="fade-up">
+          <AdUnit slot="YOUR_GOOGLE_AD_SLOT_2" />
+        </div>
 
         {showShopSection && <section id="shop"><ShopSection /></section>}
         <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
@@ -135,14 +102,16 @@ export default function App() {
 
       <Footer />
 
-        <button
+      {/* Floating Chat */}
+      <button
         onClick={() => setChatOpen(true)}
         aria-label="Open Chatbot"
-        className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
+                className="fixed bottom-6 right-6 bg-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition-colors duration-300 z-50 relative"
         style={{ position: 'fixed' }} // Force fixed positioning
+
       >
         💬 Chat
-        {!chatOpen && <span className="blink-dot"></span>}
+        {!chatOpen && <span className="absolute top-2 left-2 w-2 h-2 bg-green-500 rounded-full animate-ping"></span>}
       </button>
 
       <ChatbotPopup open={chatOpen} onClose={() => setChatOpen(false)} />
