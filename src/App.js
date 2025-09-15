@@ -135,7 +135,13 @@ function TopBar({ showShopSection, onChatOpen }) {
     <header className="w-full bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 via-red-400 to-yellow-300 flex items-center justify-center text-white font-bold">TF</div>
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-white shadow-sm flex items-center justify-center">
+        <img 
+          src="/applogo.png" 
+          alt="Tanya Fashion Skincare Logo" 
+          className="w-10 h-10 object-contain"
+        />
+      </div>
           <h1 className="text-lg font-semibold">Tanya Fashion Skincare</h1>
         </div>
 
@@ -210,8 +216,12 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900">Welcome to Tanya Fashion Skincare 💖</h2>
           <p className="mt-3 text-gray-800 text-lg">
-            Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family.
-          </p>
+  Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family.
+</p>
+<p className="mt-3 text-gray-800 text-lg">
+  <strong>NEW:</strong> Try my FREE AI Face Analysis! Upload your photo to discover your skin age and get personalized DIY recipes instantly.
+</p>
+
           <div className="mt-6 flex gap-3 flex-wrap">
             <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="px-5 py-3 bg-red-600 text-white rounded-lg text-sm shadow hover:bg-red-700">Subscribe on YouTube</a>
             <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="px-5 py-3 bg-pink-500 text-white rounded-lg text-sm shadow hover:bg-pink-600">Follow on Instagram</a>

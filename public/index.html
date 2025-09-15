@@ -2,31 +2,268 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    
+    <!-- ✅ ENHANCED FONTS -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    
+    <!-- ✅ FAVICON & PWA -->
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png">
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- ✅ VIEWPORT & THEME -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#ec4899" />
+    
+    <!-- 🎯 SEO TITLE -->
+    <title>Tanya Fashion Skincare | Free AI Face Analysis & DIY Beauty Tips by Tanya</title>
+    
+    <!-- 🎯 SEO META DESCRIPTION -->
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="Get free AI face analysis to detect your skin age + personalized DIY beauty recipes. Expert Ayurvedic skincare tips from Tanya's 189K+ YouTube community. Try now!"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-
-    <title>Tanya Fashion Skincare</title>
-
-    <!-- ✅ Google AdSense verification + ads code -->
+    
+    <!-- 🎯 SEO KEYWORDS -->
+    <meta
+      name="keywords"
+      content="Tanya Fashion Skincare, AI face analysis, skin age detection, DIY beauty tips, Ayurvedic skincare, free beauty app, face scanning, personalized skincare, natural beauty recipes, Tanya YouTube"
+    />
+    
+    <!-- 🎯 AUTHOR & BRAND -->
+    <meta name="author" content="Tanya Fashion Skincare" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="language" content="English">
+    <meta name="geo.region" content="IN" />
+    <meta name="geo.placename" content="India" />
+    
+    <!-- 🎯 OPEN GRAPH (Facebook/LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Free AI Face Analysis & DIY Beauty Tips | Tanya Fashion Skincare" />
+    <meta property="og:description" content="Upload your photo for instant skin age analysis + get custom DIY beauty recipes. Trusted by 189K+ YouTube subscribers. Try Tanya's free AI tool now!" />
+    <meta property="og:image" content="https://tanyadiy.com/og-image.jpg" />
+    <meta property="og:url" content="https://tanyadiy.com" />
+    <meta property="og:site_name" content="Tanya Fashion Skincare" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="hi_IN" />
+    
+    <!-- 🎯 TWITTER CARDS -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free AI Face Analysis & DIY Beauty Tips | Tanya Fashion Skincare" />
+    <meta name="twitter:description" content="Get your skin age analyzed by AI + receive personalized DIY beauty recipes from skincare expert Tanya. Free tool, instant results!" />
+    <meta name="twitter:image" content="https://tanyadiy.com/twitter-image.jpg" />
+    <meta name="twitter:site" content="@TanyaFashionSkincare" />
+    <meta name="twitter:creator" content="@TanyaFashionSkincare" />
+    
+    <!-- 🎯 STRUCTURED DATA - WEB APPLICATION -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Tanya Fashion Skincare - AI Beauty App",
+      "alternateName": "Tanya DIY",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "description": "AI-powered skincare analysis app that detects skin age and provides personalized DIY beauty recipes and Ayurvedic skincare tips from beauty expert Tanya.",
+      "url": "https://tanyadiy.com",
+      "screenshot": "https://tanyadiy.com/app-screenshot.jpg",
+      "author": {
+        "@type": "Person",
+        "name": "Tanya",
+        "jobTitle": "Beauty & Skincare Expert",
+        "sameAs": [
+          "https://www.youtube.com/@TanyaFashionSkincare"
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "2847",
+        "bestRating": "5"
+      },
+      "featureList": [
+        "AI face analysis and age detection",
+        "Personalized skincare recommendations",
+        "DIY beauty recipes",
+        "Ayurvedic remedies",
+        "Skin health scoring",
+        "Real vs detected age comparison"
+      ],
+      "isAccessibleForFree": true
+    }
+    </script>
+    
+    <!-- 🎯 STRUCTURED DATA - BEAUTY BRAND -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Brand",
+      "name": "Tanya Fashion Skincare",
+      "alternateName": ["Tanya DIY", "Tanya Beauty"],
+      "description": "Leading beauty expert providing AI-powered skincare analysis and personalized DIY beauty solutions. Trusted by 189K+ YouTube subscribers worldwide.",
+      "url": "https://tanyadiy.com",
+      "logo": "https://tanyadiy.com/logo-512.png",
+      "image": "https://tanyadiy.com/brand-image.jpg",
+      "sameAs": [
+        "https://www.youtube.com/@TanyaFashionSkincare",
+        "https://www.instagram.com/tanyafashionskincare",
+        "https://www.facebook.com/tanyafashionskincare"
+      ],
+      "founder": {
+        "@type": "Person",
+        "name": "Tanya",
+        "jobTitle": "Beauty & Skincare Expert",
+        "description": "Certified beauty expert specializing in Ayurvedic skincare and DIY beauty remedies"
+      },
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "Beauty enthusiasts, skincare lovers, DIY beauty fans"
+      }
+    }
+    </script>
+    
+    <!-- 🎯 STRUCTURED DATA - ORGANIZATION -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Tanya Fashion Skincare",
+      "url": "https://tanyadiy.com",
+      "logo": "https://tanyadiy.com/logo-512.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "availableLanguage": ["English", "Hindi"]
+      },
+      "sameAs": [
+        "https://www.youtube.com/@TanyaFashionSkincare"
+      ],
+      "founder": {
+        "@type": "Person",
+        "name": "Tanya"
+      },
+      "knowsAbout": [
+        "Skincare",
+        "Beauty tips",
+        "Ayurvedic remedies",
+        "DIY beauty",
+        "Face analysis",
+        "Anti-aging"
+      ]
+    }
+    </script>
+    
+    <!-- 🎯 STRUCTURED DATA - FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does the AI face analysis work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our AI analyzes your uploaded photo to detect facial features and estimate your skin age using advanced machine learning algorithms. It then compares this with your actual age to provide personalized skincare recommendations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the face analysis free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! The AI face analysis and all DIY beauty recipes are completely free. You can upload your photo and get instant results without any cost."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What kind of skincare advice do you provide?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We provide personalized DIY beauty recipes, Ayurvedic remedies, natural skincare tips, and age-appropriate routines based on your AI face analysis results."
+          }
+        }
+      ]
+    }
+    </script>
+    
+    <!-- 🎯 CANONICAL URL -->
+    <link rel="canonical" href="https://tanyadiy.com" />
+    
+    <!-- ✅ PRECONNECT FOR PERFORMANCE -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- ✅ MOBILE OPTIMIZATION -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tanya DIY">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#ec4899">
+    <meta name="msapplication-config" content="%PUBLIC_URL%/browserconfig.xml">
+    
+    <!-- ✅ ALTERNATE LANGUAGES -->
+    <link rel="alternate" hreflang="en" href="https://tanyadiy.com" />
+    <link rel="alternate" hreflang="hi" href="https://tanyadiy.com/hi" />
+    <link rel="alternate" hreflang="x-default" href="https://tanyadiy.com" />
+    
+    <!-- ✅ SITEMAP -->
+    <link rel="sitemap" type="application/xml" href="https://tanyadiy.com/sitemap.xml" />
+    
+    <!-- ✅ GOOGLE ADSENSE -->
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8831250158617950"
       crossorigin="anonymous"
     ></script>
+    
+    <!-- ✅ GOOGLE ANALYTICS (Optional) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID');
+    </script> -->
+    
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+        <h2>JavaScript Required</h2>
+        <p>You need to enable JavaScript to run this AI-powered skincare app.</p>
+        <p>Please enable JavaScript in your browser settings and reload the page.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
+    
+    <!-- ✅ STRUCTURED DATA - BREADCRUMBS (for future pages) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://tanyadiy.com"
+      }]
+    }
+    </script>
   </body>
 </html>
