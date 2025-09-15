@@ -154,7 +154,7 @@ function TopBar({ showShopSection, onChatOpen }) {
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange}>Say Hello</NavItem>
           <button onClick={onChatOpen} className="text-pink-500 font-bold hover:underline" aria-label="Open chat">
-            Chat 💬
+            AI Chat 💬
           </button>
         </nav>
 
@@ -178,7 +178,7 @@ function TopBar({ showShopSection, onChatOpen }) {
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
           <button onClick={() => { onChatOpen(); setMenuOpen(false); }} className="block text-pink-500 font-bold hover:underline" aria-label="Open chat">
-            Chat 💬
+            AI Chat 💬
           </button>
         </div>
       )}
@@ -216,7 +216,7 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
         <div>
           <h2 className="text-4xl font-extrabold text-gray-900">Welcome to Tanya Fashion Skincare 💖</h2>
           <p className="mt-3 text-gray-800 text-lg">
-  Your daily dose of DIY skincare, beauty tips, and fun content! Join our growing family.
+  Your daily dose of <strong>DIY</strong> skincare, beauty tips, and fun content! Join our growing family.
 </p>
 <p className="mt-3 text-gray-800 text-lg">
   <strong>NEW:</strong> Try my FREE AI Face Analysis! Upload your photo to discover your skin age and get personalized DIY recipes instantly.
