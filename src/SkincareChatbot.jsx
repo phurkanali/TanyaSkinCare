@@ -851,6 +851,20 @@ RESPONSE STRUCTURE (for beauty Qs):
 - 1 precaution (1 line)  
 - Supportive, encouraging closing  
 
+PROFILE USAGE RULE:
+• Always personalize responses using the user's profile:
+   - Name → Always greet with their name.  
+   - Age → Suggest age-appropriate tips (e.g., anti-aging for 30+, acne for teens).  
+   - Gender → Include relevant advice (e.g., PCOS, pregnancy-related hair fall for females).  
+   - Skin Type → Adapt skincare (hydrating for dry, oil-control for oily, soothing for sensitive).  
+   - Location → Recommend remedies/products available in their country.  
+
+LANGUAGE RULE:
+• Always reply in the **same language** the user used.  
+• If the user asks in Hindi → reply fully in Hindi.  
+• If the user asks in Hinglish → reply in Hinglish (mix of Hindi + English).  
+• If the user asks in English → reply in English.  
+
 LANGUAGE RULE:
 • Always reply in the **same language** the user used.  
 • If the user asks in Hindi → reply fully in Hindi.  
@@ -1072,7 +1086,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            Hi there! 😊 I'm Tanya, your friendly skincare assistant. Can you please tell me your name so I can personalize your skincare advice?
+            Hi 😊 I’m Tanya, your skincare assistant. What’s your name?
           </div>
         )}
 
@@ -1085,7 +1099,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            Nice to meet you, {formData.name}! 💖 To give you age-appropriate skincare advice, could you please tell me how old you are(Age)?
+            Nice to meet you, {formData.name}! 💖 To share the best skincare tips for you, can you tell me your age?
           </div>
         )}
 
@@ -1098,7 +1112,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Perfect! Now, could you please let me know your gender? This helps me recommend the right products and routines for you. 🌸</p>
+            <p style={{ marginBottom: "1rem" }}>Great! 🌸 Can you tell me your gender? This will help me suggest the right skincare for you.</p>
             <button
               onClick={() => handleNext("Female")}
               style={{
@@ -1140,7 +1154,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Great! Now, what's your skin type? If you're not sure, choose the one that sounds most like your skin. ✨</p>
+            <p style={{ marginBottom: "1rem" }}>Great! ✨ What’s your skin type? If you’re not sure, just pick the one that feels closest.</p>
             {["Normal", "Dry", "Oily", "Combination", "Sensitive"].map(
               (type) => (
                 <label
@@ -1179,7 +1193,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Almost done! Which country are you in? This helps me suggest products that are easily available to you. 🌏</p>
+            <p style={{ marginBottom: "1rem" }}>Almost done! 🌏 Which country are you in? This helps me suggest products available near you.</p>
             <select
               style={{
                 width: "100%",
@@ -1260,7 +1274,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "1rem" }}>Last question! Do you have any known allergies to skincare or haircare products? This is important for your safety. 🤔</p>
+            <p style={{ marginBottom: "1rem" }}>Last question! 🤔 Do you have any allergies to skincare or haircare products? This helps keep you safe.</p>
             <div
               style={{
                 display: "flex",
@@ -1357,7 +1371,7 @@ RULES:
               marginBottom: "1rem",
             }}
           >
-            <p style={{ marginBottom: "12px" }}>Great! Now I can help you with skincare and haircare. What's your question?</p>
+            <p style={{ marginBottom: "12px" }}>Awesome! 🎉 Now I can help you with skincare and haircare. What’s your question?</p>
             
             {/* Face Analysis Button */}
             <button
