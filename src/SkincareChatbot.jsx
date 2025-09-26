@@ -370,6 +370,14 @@ export default function SkincareChatbot({ onClose }) {
 
     setImageAnalyzing(true);
     
+    // ✅ ADD THIS: Show immediate analyzing feedback
+setMessages(prev => [...prev, {
+  id: Date.now() + 0.5,
+  sender: "bot", 
+  text: "🔍 Analyzing your photo with AI... This will take a few seconds!",
+  timestamp: new Date().toISOString()
+}]);
+
     const imageUrl = URL.createObjectURL(file);
     setUploadedImage(imageUrl);
     
@@ -502,28 +510,32 @@ Feel free to ask any skincare questions! 😊`;
     }
   };
 
-  // ✨ Handle image upload
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  // ✨ Handle image upload - FIXED VERSION
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
-    if (!modelsLoaded) {
-      alert('AI models are still loading. Please wait a moment and try again.');
-      return;
-    }
+  if (!modelsLoaded) {
+    alert('AI models are still loading. Please wait a moment and try again.');
+    return;
+  }
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file only');
-      return;
-    }
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file only');
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Please upload an image smaller than 5MB');
-      return;
-    }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Please upload an image smaller than 5MB');
+    return;
+  }
 
-    analyzeFaceImage(file);
-  };
+  // ✅ IMPORTANT: Don't hide upload interface yet
+  // setShowImageUpload(false); // ❌ Remove this line
+  
+  analyzeFaceImage(file);
+};
+
 
   const beautifyResponse = (text) => {
     if (!text) return text;
@@ -1388,68 +1400,125 @@ RULES:
           </div>
         )}
 
-        {/* Image upload interface */}
-        {showImageUpload && (
+        {/* Image upload interface - FIXED VERSION WITH PROGRESS */}
+{showImageUpload && (
+  <div style={{
+    background: "white",
+    padding: "1rem",
+    borderRadius: "8px",
+    marginBottom: "1rem",
+    border: "2px dashed #ec4899"
+  }}>
+    <h4 style={{ marginBottom: "12px", color: "#333", textAlign: "center" }}>
+      📸 Upload Your Face Photo
+    </h4>
+    <p style={{ fontSize: "14px", color: "#666", marginBottom: "16px", textAlign: "center" }}>
+      Take a clear, well-lit photo of your face. I'll analyze your skin age and suggest personalized care!
+    </p>
+    
+    {/* ✅ IMPORTANT: Show progress when analyzing */}
+    {imageAnalyzing && (
+      <div style={{
+        background: "#f0f9ff",
+        border: "2px solid #3b82f6", 
+        padding: "12px",
+        borderRadius: "8px",
+        marginBottom: "16px",
+        textAlign: "center"
+      }}>
+        <div style={{ fontSize: "20px", marginBottom: "8px" }}>🔍</div>
+        <p style={{ color: "#1e40af", fontWeight: "500", marginBottom: "8px" }}>
+          Analyzing your photo with AI... Please wait!
+        </p>
+        <div style={{
+          width: "100%",
+          height: "6px",
+          background: "#e5e7eb",
+          borderRadius: "3px",
+          overflow: "hidden",
+          marginBottom: "8px"
+        }}>
           <div style={{
-            background: "white",
-            padding: "1rem",
-            borderRadius: "8px",
-            marginBottom: "1rem",
-            border: "2px dashed #ec4899"
-          }}>
-            <h4 style={{ marginBottom: "12px", color: "#333", textAlign: "center" }}>📸 Upload Your Face Photo</h4>
-            <p style={{ fontSize: "14px", color: "#666", marginBottom: "16px", textAlign: "center" }}>
-              Take a clear photo of your face and I'll tell you your skin age and any problems I notice.
-            </p>
-            
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              style={{ display: "none" }}
-              id="face-upload"
-            />
-            
-            <div style={{ display: "flex", gap: "8px" }}>
-              <label 
-                htmlFor="face-upload"
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  background: "#ec4899",
-                  color: "white",
-                  textAlign: "center",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px"
-                }}
-              >
-                <FiCamera size={18} />
-                Upload Photo
-              </label>
-              
-              <button
-                onClick={() => setShowImageUpload(false)}
-                style={{
-                  padding: "12px 16px",
-                  background: "#6b7280",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "16px"
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+            width: "100%",
+            height: "100%",
+            background: "linear-gradient(90deg, #3b82f6, #8b5cf6)",
+            animation: "progress 2s ease-in-out infinite"
+          }}></div>
+        </div>
+        <p style={{ fontSize: "12px", color: "#6b7280" }}>
+          This will take 3-5 seconds. Please don't close this window!
+        </p>
+      </div>
+    )}
+    
+    <input
+      type="file"
+      accept="image/*"
+      onChange={handleImageUpload}
+      style={{ display: "none" }}
+      id="face-upload"
+      disabled={imageAnalyzing}
+    />
+    
+    <div style={{ display: "flex", gap: "8px" }}>
+      <label 
+        htmlFor="face-upload"
+        style={{
+          flex: 1,
+          padding: "12px",
+          background: imageAnalyzing ? "#9ca3af" : "#ec4899",
+          color: "white",
+          textAlign: "center",
+          borderRadius: "8px",
+          cursor: imageAnalyzing ? "not-allowed" : "pointer",
+          fontSize: "16px",
+          fontWeight: "500",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          opacity: imageAnalyzing ? 0.7 : 1,
+          pointerEvents: imageAnalyzing ? "none" : "auto"
+        }}
+      >
+        <FiCamera size={18} />
+        {imageAnalyzing ? "Analyzing..." : "Upload Photo"}
+      </label>
+      
+      <button
+        onClick={() => {
+          if (!imageAnalyzing) {
+            setShowImageUpload(false);
+          }
+        }}
+        disabled={imageAnalyzing}
+        style={{
+          padding: "12px 16px",
+          background: imageAnalyzing ? "#9ca3af" : "#6b7280",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          cursor: imageAnalyzing ? "not-allowed" : "pointer",
+          fontSize: "16px",
+          opacity: imageAnalyzing ? 0.7 : 1,
+          pointerEvents: imageAnalyzing ? "none" : "auto"
+        }}
+      >
+        {imageAnalyzing ? "Wait..." : "Cancel"}
+      </button>
+    </div>
+
+    {/* Photo tips */}
+    <div style={{
+      marginTop: "12px",
+      fontSize: "12px",
+      color: "#666",
+      textAlign: "center"
+    }}>
+      💡 <strong>Tips:</strong> Good lighting • Face clearly visible • Look directly at camera • Remove sunglasses
+    </div>
+  </div>
+)}
 
         {loading && (
           <div
