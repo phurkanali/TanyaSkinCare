@@ -18,7 +18,7 @@ const SOCIAL_CONFIG = {
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
-  const [stats, setStats] = useState({ subscribers: 232, instagram: 63, monthlyViews: 155 });
+  const [stats, setStats] = useState({ subscribers: 273, instagram: 70, monthlyViews: 186 });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
