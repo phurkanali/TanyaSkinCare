@@ -109,7 +109,7 @@ export default function App() {
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-pink-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-lg hover:bg-pink-600 active:scale-95 transition-all duration-300 z-50 text-sm sm:text-base"
       >
         <span className="hidden sm:inline">💬 Chat</span>
-        <span className="sm:hidden">💬</span>
+        <span className="sm:hidden">💬 Chat</span>
         {!chatOpen && <span className="absolute top-1 left-1 sm:top-2 sm:left-2 w-2 h-2 bg-green-500 rounded-full animate-ping"></span>}
       </button>
 
