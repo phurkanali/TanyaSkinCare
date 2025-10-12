@@ -106,11 +106,12 @@ export default function App() {
       <button
         onClick={() => setChatOpen(true)}
         aria-label="Open Chatbot"
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-pink-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-lg hover:bg-pink-600 active:scale-95 transition-all duration-300 z-50 text-sm sm:text-base"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-3 sm:px-5 sm:py-3 rounded-2xl shadow-2xl hover:shadow-pink-500/50 hover:from-pink-600 hover:to-rose-600 active:scale-95 transition-all duration-300 z-50 text-sm sm:text-base font-semibold group"
       >
-        <span className="hidden sm:inline">💬 Chat</span>
-        <span className="sm:hidden">💬 Chat</span>
-        {!chatOpen && <span className="absolute top-1 left-1 sm:top-2 sm:left-2 w-2 h-2 bg-green-500 rounded-full animate-ping"></span>}
+        <span className="hidden sm:inline group-hover:scale-110 transition-transform">💬 Chat with AI</span>
+        <span className="sm:hidden group-hover:scale-110 transition-transform">💬 Chat</span>
+        {!chatOpen && <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></span>}
+        {!chatOpen && <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"></span>}
       </button>
 
       <ChatbotPopup open={chatOpen} onClose={() => setChatOpen(false)} />
@@ -131,8 +132,8 @@ function TopBar({ showShopSection, onChatOpen }) {
   };
 
   return (
-    <header className="w-full bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <header className="w-full bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white shadow-sm flex items-center justify-center">
         <img
@@ -141,19 +142,19 @@ function TopBar({ showShopSection, onChatOpen }) {
           className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
         />
       </div>
-          <h1 className="text-base sm:text-lg font-semibold">Tanya Fashion Skincare</h1>
+          <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">Tanya Fashion Skincare</h1>
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex gap-3 lg:gap-4 text-sm items-center">
+        <nav className="hidden md:flex gap-3 lg:gap-6 text-sm items-center">
           <NavItem to="home" activeTab={activeTab} onTabChange={handleTabChange}>Home</NavItem>
           <NavItem to="videos" activeTab={activeTab} onTabChange={handleTabChange}>Videos</NavItem>
           {showShopSection && <NavItem to="shop" activeTab={activeTab} onTabChange={handleTabChange}>My Favorites</NavItem>}
           <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange}>About Me</NavItem>
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange}>Say Hello</NavItem>
-          <button onClick={onChatOpen} className="text-pink-500 font-bold hover:underline whitespace-nowrap" aria-label="Open chat">
-            AI Chat 💬
+          <button onClick={onChatOpen} className="px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-semibold hover:from-pink-600 hover:to-rose-600 transition-all duration-300 hover:shadow-lg whitespace-nowrap" aria-label="Open chat">
+            💬 AI Chat
           </button>
         </nav>
 
@@ -176,8 +177,8 @@ function TopBar({ showShopSection, onChatOpen }) {
           <NavItem to="about" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>About Me</NavItem>
           <NavItem to="collaboration" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Collaboration</NavItem>
           <NavItem to="contact" activeTab={activeTab} onTabChange={handleTabChange} onClick={() => setMenuOpen(false)}>Say Hello</NavItem>
-          <button onClick={() => { onChatOpen(); setMenuOpen(false); }} className="block w-full text-left px-2 py-2 text-pink-500 font-bold hover:bg-pink-50 rounded" aria-label="Open chat">
-            AI Chat 💬
+          <button onClick={() => { onChatOpen(); setMenuOpen(false); }} className="block w-full text-center mx-2 my-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-rose-600 transition-all duration-300" aria-label="Open chat">
+            💬 AI Chat
           </button>
         </div>
       )}
@@ -210,23 +211,27 @@ function NavItem({ to, children, onClick, activeTab, onTabChange }) {
 // Hero - UPDATED with live stats
 function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
   return (
-    <section className="bg-gradient-to-br from-pink-200 via-pink-300 to-orange-200 py-12 md:py-16" data-aos="fade-up">
-      <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-6 md:gap-8 items-center">
+    <section className="relative bg-gradient-to-br from-rose-100 via-pink-50 to-amber-50 py-16 md:py-24 overflow-hidden" data-aos="fade-up">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,207,232,0.3),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(254,215,170,0.2),transparent_50%)]" />
+      <div className="relative max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900">Welcome to Tanya Fashion Skincare 💖</h2>
-          <p className="mt-3 text-gray-800 text-base md:text-lg">
-  Your daily dose of <strong>DIY</strong> skincare, beauty tips, and fun content! Join our growing family.
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">Welcome to<br /><span className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text text-transparent">Tanya Fashion Skincare</span> 💖</h2>
+          <p className="mt-6 text-gray-700 text-lg md:text-xl leading-relaxed">
+  Your daily dose of <strong className="text-pink-600">DIY</strong> skincare, beauty tips, and fun content! Join our growing family.
 </p>
-<p className="mt-3 text-gray-800 text-base md:text-lg">
-  <strong>NEW:</strong> Try my FREE AI Face Analysis! Upload your photo to discover your skin age and get personalized DIY recipes instantly.
-</p>
+<div className="mt-5 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-pink-200 shadow-sm">
+  <p className="text-gray-800 text-base md:text-lg">
+    <strong className="text-pink-600">NEW:</strong> Try my FREE AI Face Analysis! Upload your photo to discover your skin age and get personalized DIY recipes instantly.
+  </p>
+</div>
 
-          <div className="mt-6 flex gap-3 flex-wrap">
+          <div className="mt-8 flex gap-4 flex-wrap">
             <a 
               href="https://youtube.com/@tanyafashionskincare" 
               target="_blank" 
               rel="noreferrer" 
-              className="px-5 py-3 bg-red-600 text-white rounded-lg text-sm shadow hover:bg-red-700 flex items-center gap-2 transition-all duration-300"
+              className="px-6 py-3.5 bg-red-600 text-white rounded-xl text-sm font-medium shadow-lg hover:shadow-xl hover:bg-red-700 hover:-translate-y-0.5 flex items-center gap-2 transition-all duration-300"
               aria-label="Subscribe on YouTube"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -238,7 +243,7 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
               href="http://instagram.com/tanikhanvlog1996/" 
               target="_blank" 
               rel="noreferrer" 
-              className="px-5 py-3 bg-pink-500 text-white rounded-lg text-sm shadow hover:bg-pink-600 flex items-center gap-2 transition-all duration-300"
+              className="px-6 py-3.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl text-sm font-medium shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-rose-600 hover:-translate-y-0.5 flex items-center gap-2 transition-all duration-300"
               aria-label="Follow on Instagram"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -249,10 +254,10 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
           </div>
 
           {/* NEW: Enhanced stats section with live data */}
-          <div className="mt-8">
-            <div className="flex items-center gap-3 mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          <div className="mt-10">
+            <div className="flex items-center gap-3 mb-5">
+              <h4 className="text-base font-semibold text-gray-800 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
                 Live Stats
               </h4>
             </div>
@@ -264,16 +269,19 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-sm">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-md">
               <Stat label="YouTube" value={stats.subscribers} suffix="K+" loading={loading} />
               <Stat label="Instagram" value={stats.instagram} suffix="K+" loading={loading} />
               <Stat label="YT Views" value={stats.monthlyViews} suffix="M+" loading={loading} />
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-center mt-6 md:mt-0">
-          <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden">
-            <img alt="Tanya" src="/MainPic.JPG" className="object-cover w-full h-full" />
+        <div className="flex items-center justify-center mt-8 md:mt-0" data-aos="zoom-in" data-aos-delay="200">
+          <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-rose-400 rounded-3xl rotate-6 opacity-20 blur-xl"></div>
+            <div className="relative w-full h-full rounded-3xl bg-white shadow-2xl overflow-hidden ring-4 ring-white/50">
+              <img alt="Tanya" src="/MainPic.JPG" className="object-cover w-full h-full hover:scale-110 transition-transform duration-700" />
+            </div>
           </div>
         </div>
       </div>
@@ -285,9 +293,9 @@ function Hero({ stats, loading, onRefresh, lastUpdated, error }) {
 function Stat({ label, value, suffix, loading }) {
   const { ref, inView } = useInView({ triggerOnce: true });
   return (
-    <div ref={ref} className="bg-white p-2 sm:p-3 md:p-4 rounded-lg shadow text-center relative" data-aos="zoom-in">
-      <div className="text-xs sm:text-sm text-gray-500">{label}</div>
-      <div className="text-lg sm:text-xl font-bold text-gray-900">
+    <div ref={ref} className="bg-white/80 backdrop-blur-sm p-3 sm:p-4 md:p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-center relative group hover:-translate-y-1" data-aos="zoom-in">
+      <div className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide">{label}</div>
+      <div className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-br from-pink-600 to-rose-600 bg-clip-text text-transparent">
         {loading ? (
           <div className="animate-pulse">
             <div className="h-6 bg-gray-200 rounded"></div>
@@ -310,17 +318,21 @@ function Stat({ label, value, suffix, loading }) {
 // ShopSection
 function ShopSection() {
   return (
-    <section className="py-12 md:py-16 bg-orange-50" data-aos="fade-up">
+    <section className="py-16 md:py-20 bg-gradient-to-b from-amber-50 to-white" data-aos="fade-up">
       <div className="max-w-6xl mx-auto px-4">
-        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900">My Favorite Products</h3>
-        <p className="text-sm text-gray-700 mt-2">These are some of the skincare items I personally use and love!</p>
-        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="text-center mb-12">
+          <h3 className="text-3xl sm:text-4xl font-bold text-gray-900">My Favorite Products</h3>
+          <p className="text-base md:text-lg text-gray-600 mt-3 max-w-2xl mx-auto">These are some of the skincare items I personally use and love!</p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow" data-aos="zoom-in">
-              <div className="h-32 bg-gray-100 mb-3 flex items-center justify-center">Product</div>
-              <div className="text-md font-medium">Product {i}</div>
-              <div className="text-xs text-gray-500 mt-1">Short product description</div>
-              <button className="mt-3 px-4 py-2 bg-pink-500 text-white rounded-md text-sm hover:bg-pink-600">View Product</button>
+            <div key={i} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group" data-aos="zoom-in" data-aos-delay={i * 100}>
+              <div className="h-48 bg-gradient-to-br from-pink-100 to-rose-100 rounded-xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                <span className="text-2xl font-semibold text-gray-400">Product</span>
+              </div>
+              <div className="text-lg font-semibold text-gray-900">Product {i}</div>
+              <div className="text-sm text-gray-600 mt-2 leading-relaxed">Short product description</div>
+              <button className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl text-sm font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-300 hover:shadow-lg">View Product</button>
             </div>
           ))}
         </div>
@@ -332,13 +344,16 @@ function ShopSection() {
 // AboutSection
 function AboutSection() {
   return (
-    <section className="py-12 md:py-16 bg-rose-50" data-aos="fade-up">
+    <section className="py-16 md:py-20 bg-gradient-to-b from-rose-50 to-pink-50" data-aos="fade-up">
       <div className="max-w-4xl mx-auto px-4">
-        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900">About Me</h3>
-        <p className="mt-3 text-gray-700 text-base md:text-lg">
-          Hi, I'm Tanya! I create DIY skincare tutorials, beauty tips, and fun lifestyle content.
-          I love connecting with my viewers and sharing easy, affordable ways to look and feel amazing. 💖
-        </p>
+        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+          <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center">About Me</h3>
+          <div className="w-20 h-1 bg-gradient-to-r from-pink-500 to-rose-500 mx-auto mt-4 rounded-full"></div>
+          <p className="mt-8 text-gray-700 text-lg md:text-xl leading-relaxed text-center">
+            Hi, I'm <span className="font-semibold text-pink-600">Tanya</span>! I create DIY skincare tutorials, beauty tips, and fun lifestyle content.
+            I love connecting with my viewers and sharing easy, affordable ways to look and feel amazing. 💖
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -347,14 +362,17 @@ function AboutSection() {
 // CollaborationSection
 function CollaborationSection() {
   return (
-    <div className="py-12 md:py-16 bg-gradient-to-br from-pink-100 via-orange-100 to-pink-200" data-aos="fade-up">
-      <div className="max-w-4xl mx-auto px-4 text-center">
-        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900">Collaboration & Partnerships</h3>
-        <p className="mt-3 text-gray-700 text-base md:text-lg">
+    <div className="py-16 md:py-20 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 relative overflow-hidden" data-aos="fade-up">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(251,207,232,0.2),transparent_50%)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(254,215,170,0.2),transparent_50%)]"></div>
+      <div className="relative max-w-4xl mx-auto px-4 text-center">
+        <h3 className="text-3xl sm:text-4xl font-bold text-gray-900">Collaboration & Partnerships</h3>
+        <div className="w-20 h-1 bg-gradient-to-r from-pink-500 to-rose-500 mx-auto mt-4 rounded-full"></div>
+        <p className="mt-8 text-gray-700 text-lg md:text-xl leading-relaxed">
           I love working with brands, creators, and businesses that align with my vision in skincare, beauty, and lifestyle.
           Let's create something amazing together! 💖
         </p>
-        <p className="mt-4 text-gray-700">
+        <p className="mt-6 text-gray-700 text-lg">
           📩 Email me at{" "}
           <a
             href="mailto:tanyaskincare123@gmail.com"
@@ -364,7 +382,7 @@ function CollaborationSection() {
           </a>
 
         </p>
-        <a href="/Tanya-Media-Kit.pdf" download className="inline-block mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg shadow hover:bg-pink-600">
+        <a href="/Tanya-Media-Kit.pdf" download className="inline-block mt-8 px-8 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-xl hover:shadow-2xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 hover:-translate-y-1 font-medium text-lg">
           📄 Download My Media Kit
         </a>
       </div>
@@ -375,7 +393,7 @@ function CollaborationSection() {
 // DisclaimerSection
 function DisclaimerSection() {
   return (
-    <div className="py-5 bg-yellow-50 max-w-4xl mx-auto px-4 text-center text-sm text-yellow-900 rounded-md shadow mt-4 mb-4">
+    <div className="py-6 bg-gradient-to-r from-yellow-50 to-amber-50 max-w-5xl mx-auto my-8 px-6 text-center text-sm md:text-base text-yellow-900 rounded-2xl shadow-lg border border-yellow-200">
       <p>
         <strong>Disclaimer:</strong> The skincare and haircare tips shared on this channel are based on personal experience and general knowledge. Always{" "}
         <span className="font-bold text-red-600 underline">do a patch test</span>{" "}
@@ -388,10 +406,12 @@ function DisclaimerSection() {
 // ContactSection
 function ContactSection() {
   return (
-    <section className="py-12 md:py-16 bg-gray-100" data-aos="fade-up">
+    <section className="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50" data-aos="fade-up">
       <div className="max-w-4xl mx-auto px-4">
-        <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900">Say Hello 👋</h3>
-        <p className="text-sm md:text-base text-gray-700 mt-2">
+        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 text-center">
+          <h3 className="text-3xl sm:text-4xl font-bold text-gray-900">Say Hello 👋</h3>
+          <div className="w-20 h-1 bg-gradient-to-r from-pink-500 to-rose-500 mx-auto mt-4 rounded-full"></div>
+          <p className="text-base md:text-lg text-gray-700 mt-8 leading-relaxed">
           Have a question, feedback, or just want to say hi? Email me at{" "}
           <a
             href="mailto:tanyaskincare123@gmail.com"
@@ -400,7 +420,8 @@ function ContactSection() {
           >
             tanyaskincare123@gmail.com
           </a>
-        </p>
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -409,12 +430,12 @@ function ContactSection() {
 // Footer - NO chat button here
 function Footer() {
   return (
-    <footer className="bg-white py-6 border-t">
-      <div className="max-w-6xl mx-auto px-4 text-sm text-gray-500 flex flex-col sm:flex-row items-center sm:items-baseline gap-2 sm:gap-6">
-        <span>© {new Date().getFullYear()} Tanya Fashion Skincare • Made with 💖 for my viewers</span>
+    <footer className="bg-gradient-to-b from-gray-50 to-white py-8 border-t border-gray-200">
+      <div className="max-w-6xl mx-auto px-4 text-sm text-gray-600 flex flex-col sm:flex-row items-center sm:items-baseline gap-3 sm:gap-6">
+        <span className="font-medium">© {new Date().getFullYear()} Tanya Fashion Skincare • Made with <span className="text-pink-500">💖</span> for my viewers</span>
         <span>
-          <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="text-blue-600 underline">YouTube</a> |{' '}
-          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 underline ml-1">Instagram</a>
+          <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-700 font-medium transition-colors">YouTube</a> <span className="text-gray-400">|</span>{' '}
+          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 font-medium transition-colors ml-1">Instagram</a>
         </span>
         <span className="text-xs text-gray-700 font-mono sm:ml-auto">v{process.env.REACT_APP_VERSION}</span>
       </div>
