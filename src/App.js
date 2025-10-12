@@ -332,7 +332,7 @@ function ShopSection() {
 // AboutSection
 function AboutSection() {
   return (
-    <section className="py-12 md:py-16 bg-purple-50" data-aos="fade-up">
+    <section className="py-12 md:py-16 bg-rose-50" data-aos="fade-up">
       <div className="max-w-4xl mx-auto px-4">
         <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900">About Me</h3>
         <p className="mt-3 text-gray-700 text-base md:text-lg">
