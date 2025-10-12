@@ -18,7 +18,7 @@ const SOCIAL_CONFIG = {
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
-  const [stats, setStats] = useState({ subscribers: 273, instagram: 70, monthlyViews: 186 });
+  const [stats, setStats] = useState({ subscribers: 280, instagram: 72, monthlyViews: 191 });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
@@ -82,11 +82,6 @@ export default function App() {
       <main className="flex-1">
         <section id="home"><Hero stats={stats} loading={loading} lastUpdated={lastUpdated} error={error} /></section>
 
-        {/* Ads */}
-        <div className="my-8 flex justify-center" data-aos="fade-up">
-          <AdUnit slot="YOUR_GOOGLE_AD_SLOT_1" />
-        </div>
-
         <section id="videos"><VideosSection /></section>
 
         <div className="my-8 flex justify-center" data-aos="fade-up">
@@ -110,8 +105,13 @@ export default function App() {
       >
         <span className="hidden sm:inline group-hover:scale-110 transition-transform">💬 Chat with AI</span>
         <span className="sm:hidden group-hover:scale-110 transition-transform">💬 Chat</span>
-        {!chatOpen && <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></span>}
-        {!chatOpen && <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"></span>}
+        {!chatOpen && (
+  <>
+    <span className="absolute top-1 left-1 sm:top-2 sm:left-2 w-2 h-2 bg-green-400 rounded-full animate-ping opacity-100"></span>
+    <span className="absolute top-1 left-1 sm:top-2 sm:left-2 w-2 h-2 bg-green-500 rounded-full"></span>
+  </>
+)}
+
       </button>
 
       <ChatbotPopup open={chatOpen} onClose={() => setChatOpen(false)} />
