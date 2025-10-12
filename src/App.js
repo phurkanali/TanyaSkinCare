@@ -81,7 +81,10 @@ export default function App() {
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
       <main className="flex-1">
         <section id="home"><Hero stats={stats} loading={loading} lastUpdated={lastUpdated} error={error} /></section>
-
+{/* Ads */}
+        <div className="my-8 flex justify-center" data-aos="fade-up">
+          <AdUnit slot="YOUR_GOOGLE_AD_SLOT_1" />
+        </div>
         <section id="videos"><VideosSection /></section>
 
         <div className="my-8 flex justify-center" data-aos="fade-up">
