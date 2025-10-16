@@ -81,15 +81,8 @@ export default function App() {
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} />
       <main className="flex-1">
         <section id="home"><Hero stats={stats} loading={loading} lastUpdated={lastUpdated} error={error} /></section>
-{/* Ads */}
-        <div className="my-8 flex justify-center" data-aos="fade-up">
-          <AdUnit slot="YOUR_GOOGLE_AD_SLOT_1" />
-        </div>
-        <section id="videos"><VideosSection /></section>
 
-        <div className="my-8 flex justify-center" data-aos="fade-up">
-          <AdUnit slot="YOUR_GOOGLE_AD_SLOT_2" />
-        </div>
+        <section id="videos"><VideosSection /></section>
 
         {showShopSection && <section id="shop"><ShopSection /></section>}
         <section id="about" className="scroll-mt-[80px]"><AboutSection /></section>
@@ -435,10 +428,15 @@ function Footer() {
   return (
     <footer className="bg-gradient-to-b from-gray-50 to-white py-8 border-t border-gray-200">
       <div className="max-w-6xl mx-auto px-4 text-sm text-gray-600 flex flex-col sm:flex-row items-center sm:items-baseline gap-3 sm:gap-6">
-        <span className="font-medium">© {new Date().getFullYear()} Tanya Fashion Skincare • Made with <span className="text-pink-500">💖</span> for my viewers</span>
+        <span className="font-medium">
+          © {new Date().getFullYear()} Tanya Fashion Skincare • Made with <span className="text-pink-500">💖</span>
+        </span>
         <span>
-          <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-700 font-medium transition-colors">YouTube</a> <span className="text-gray-400">|</span>{' '}
-          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 font-medium transition-colors ml-1">Instagram</a>
+          <a href="https://youtube.com/@tanyafashionskincare" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-700 font-medium">YouTube</a>
+          <span className="text-gray-400"> | </span>
+          <a href="http://instagram.com/tanikhanvlog1996/" target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 font-medium ml-1">Instagram</a>
+          <span className="text-gray-400"> | </span>
+          <a href="/privacy-policy" className="text-gray-600 hover:text-gray-800 font-medium ml-1">Privacy Policy</a>
         </span>
         <span className="text-xs text-gray-700 font-mono sm:ml-auto">v{process.env.REACT_APP_VERSION}</span>
       </div>
