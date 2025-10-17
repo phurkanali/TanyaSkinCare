@@ -18,7 +18,7 @@ const SOCIAL_CONFIG = {
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
-  const [stats, setStats] = useState({ subscribers: 280, instagram: 72, monthlyViews: 191 });
+  const [stats, setStats] = useState({ subscribers: 300, instagram: 75, monthlyViews: 205 });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
@@ -298,7 +298,8 @@ function Stat({ label, value, suffix, loading }) {
           </div>
         ) : (
           inView && (
-            <CountUp end={value} duration={2} decimals={suffix.includes("M") ? 1 : 0} suffix={suffix} />
+            <CountUp end={Math.floor(value)} duration={2} decimals={0} suffix={suffix} />
+
           )
         )}
       </div>

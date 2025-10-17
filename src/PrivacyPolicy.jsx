@@ -21,49 +21,60 @@ export default function PrivacyPolicy() {
         <div className="w-20 h-1 bg-gradient-to-r from-pink-500 to-rose-500 mx-auto mt-4 rounded-full"></div>
 
         <p className="mt-8 text-gray-700 leading-relaxed">
-          Your privacy is important to us. This Privacy Policy explains how Tanya Fashion Skincare
-          (“we”, “our”, or “us”) collects, uses, and protects your information when you use our
-          website, chatbot, or any related services.
+          Your privacy is extremely important to us. This Privacy Policy explains how Tanya DIY
+          (“we”, “our”, or “us”) handles your information when you visit our website or interact
+          with our chatbot or other features.
         </p>
 
         <h2 className="mt-8 text-2xl font-semibold text-gray-900">
           1. Information We Collect
         </h2>
         <p className="mt-2 text-gray-700">
-          We may collect personal information such as your name, email address, and messages you
-          send through our chatbot or contact form. We also collect analytics data to improve our
-          services.
+          We do not collect or permanently store any personal information, photos, or chat messages.
+          The chatbot may process your questions temporarily to provide accurate responses, but this
+          data is not saved on our servers.
         </p>
 
         <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-          2. How We Use Your Information
+          2. Chatbot Interactions
         </h2>
         <p className="mt-2 text-gray-700">
-          We use your data to respond to your inquiries, improve our content, and provide better
-          recommendations. We never sell or share your information with third parties for marketing
-          purposes.
+          When you chat with our AI assistant, your messages are used only to generate replies.
+          Once your session ends, the data is deleted automatically and is not stored or shared in
+          any form.
         </p>
 
         <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-          3. Cookies & Analytics
+          3. Photos & Uploads
         </h2>
         <p className="mt-2 text-gray-700">
-          Our site may use cookies and analytics tools like Google Analytics to understand visitor
-          behavior and enhance your experience.
+          If you upload a photo or provide an image for analysis, it is processed in real-time to
+          give instant results. We do not store, share, or reuse any images after the analysis is
+          completed.
         </p>
 
         <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-          4. Data Security
+          4. Cookies & Analytics
         </h2>
         <p className="mt-2 text-gray-700">
-          We take reasonable measures to protect your personal data from unauthorized access,
-          disclosure, or misuse.
+          Our site may use cookies and analytics tools (like Google Analytics or Ezoic) to
+          understand visitor trends and improve the website experience. These do not include your
+          personal chat or image data.
         </p>
 
-        <h2 className="mt-6 text-2xl font-semibold text-gray-900">5. Your Rights</h2>
+        <h2 className="mt-6 text-2xl font-semibold text-gray-900">
+          5. Data Security
+        </h2>
         <p className="mt-2 text-gray-700">
-          You may request access to, correction, or deletion of your personal data by contacting us
-          at{" "}
+          We take strong precautions to ensure that your browsing and chatbot experience remain
+          secure. Since we do not store any personal data, there is no risk of your chat or image
+          being accessed later.
+        </p>
+
+        <h2 className="mt-6 text-2xl font-semibold text-gray-900">6. Your Rights</h2>
+        <p className="mt-2 text-gray-700">
+          You have full control over what you share in the chatbot. If you have any questions about
+          privacy or security, you can contact us at{" "}
           <a
             href="mailto:tanyaskincare123@gmail.com"
             className="text-pink-600 underline hover:text-pink-700"
@@ -73,15 +84,7 @@ export default function PrivacyPolicy() {
           .
         </p>
 
-        <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-          6. Updates to This Policy
-        </h2>
-        <p className="mt-2 text-gray-700">
-          We may update this Privacy Policy from time to time. Any changes will be posted on this
-          page with an updated effective date.
-        </p>
-
-        {/* ✅ Ezoic Privacy Policy Disclosure */}
+        {/* ✅ Keep Ezoic Policy (unchanged) */}
         <h2 className="mt-6 text-2xl font-semibold text-gray-900">
           7. Ezoic Services
         </h2>
@@ -100,7 +103,7 @@ export default function PrivacyPolicy() {
         </p>
 
         <p className="mt-8 text-gray-700">
-          <strong>Effective Date:</strong> October 16, 2025
+          <strong>Effective Date:</strong> October 17, 2025
         </p>
 
         <div className="mt-10 text-center">
