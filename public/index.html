@@ -41,7 +41,7 @@
     />
     
     <!-- 🎯 AUTHOR & BRAND -->
-    <meta name="author" content="Phurkan Ali" />
+    <meta name="author" content="Tanya Fashion Skincare" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     <meta name="language" content="English">
@@ -230,13 +230,6 @@
     <!-- ✅ SITEMAP -->
     <link rel="sitemap" type="application/xml" href="https://tanyadiy.com/sitemap.xml" />
     
-    <!-- ✅ GOOGLE ADSENSE -->
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8831250158617950"
-      crossorigin="anonymous"
-    ></script>
-    
     <!-- 🔧 EZOIC HEADER SCRIPT -->
     <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
     <script>
@@ -263,6 +256,25 @@
       </div>
     </noscript>
     <div id="root"></div>
+    
+    <!-- 🔍 EZOIC INTEGRATION TEST -->
+    <script>
+    setTimeout(() => {
+      console.log('=== EZOIC INTEGRATION TEST ===');
+      console.log('✅ Page loaded at:', new Date().toLocaleString());
+      console.log('🔒 Privacy CMP loaded:', typeof window.__cmp !== 'undefined' ? '✅ YES' : '❌ NO');
+      console.log('🎯 Ezoic standalone loaded:', typeof window.ezstandalone !== 'undefined' ? '✅ YES' : '❌ NO');
+      console.log('📊 Command queue length:', window.ezstandalone?.cmd?.length || 0);
+      console.log('===============================');
+      
+      // Test if ready for ads
+      if (window.ezstandalone && window.ezstandalone.cmd) {
+        console.log('🎉 EZOIC INTEGRATION SUCCESSFUL!');
+      } else {
+        console.log('❌ EZOIC INTEGRATION FAILED!');
+      }
+    }, 3000);
+    </script>
     
     <!-- ✅ STRUCTURED DATA - BREADCRUMBS (for future pages) -->
     <script type="application/ld+json">

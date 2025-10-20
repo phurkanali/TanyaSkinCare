@@ -88,11 +88,20 @@ try {
 // ✅ EZOIC AD COMPONENT
 function EzoicAd({ id, size = "responsive" }) {
   useEffect(() => {
-    if (window.ezstandalone && window.ezstandalone.cmd) {
-      window.ezstandalone.cmd.push(function() {
-        window.ezstandalone.display(id);
-      });
-    }
+    const initAd = () => {
+      if (window.ezstandalone && window.ezstandalone.cmd) {
+        window.ezstandalone.cmd.push(function() {
+          window.ezstandalone.display(id);
+        });
+        console.log(`✅ Ezoic ad initialized: ${id}`);
+      } else {
+        console.log(`⏳ Waiting for Ezoic to load for ad: ${id}`);
+        setTimeout(initAd, 1000);
+      }
+    };
+    
+    // Delay to ensure Ezoic is loaded
+    setTimeout(initAd, 2000);
   }, [id]);
 
   return (
@@ -105,10 +114,12 @@ function EzoicAd({ id, size = "responsive" }) {
       }}
     >
       <div 
-        className="ezoic-adpicker-ad" 
+        className="ezoic-adpicker-ad bg-gray-100 rounded-lg flex items-center justify-center"
         data-ad-type="banner"
         data-ad-size={size}
-      ></div>
+      >
+        <span className="text-gray-400 text-sm">Ad Loading - {id}</span>
+      </div>
     </div>
   );
 }
@@ -211,6 +222,7 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [ezoicReady, setEzoicReady] = useState(false);
 
   // Fetch & cache social stats
   const fetchLiveStats = async () => {
@@ -259,7 +271,7 @@ export default function App() {
     }
   };
 
-  // ✅ FIXED useEffect - Safe AOS initialization
+  // ✅ FIXED useEffect - Safe AOS initialization + Ezoic check
   useEffect(() => {
     try {
       // Safe AOS initialization
@@ -277,6 +289,20 @@ export default function App() {
       if (typeof fetchLiveStats === 'function') {
         fetchLiveStats();
       }
+
+      // Check Ezoic status
+      const checkEzoic = () => {
+        if (window.ezstandalone && window.ezstandalone.cmd) {
+          setEzoicReady(true);
+          console.log('🎉 Ezoic integration successful!');
+        } else {
+          console.log('⏳ Waiting for Ezoic...');
+          setTimeout(checkEzoic, 1000);
+        }
+      };
+      
+      setTimeout(checkEzoic, 3000);
+      
     } catch (err) {
       console.warn('Non-critical initialization error:', err);
       // App continues working even if AOS fails
@@ -289,6 +315,21 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
+      
+      {/* ✅ EZOIC STATUS INDICATOR */}
+      <div className="bg-blue-50 py-2">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
+            ezoicReady ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${
+              ezoicReady ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'
+            }`}></div>
+            {ezoicReady ? '✅ Ezoic Connected' : '⏳ Connecting to Ezoic...'}
+          </div>
+        </div>
+      </div>
+
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} onPrivacyOpen={() => setShowPrivacyPolicy(true)} />
       <main className="flex-1">
         <section id="home"><Hero stats={stats} loading={loading} lastUpdated={lastUpdated} error={error} /></section>
@@ -603,7 +644,7 @@ function AboutSection() {
   );
 }
 
-// ✅ FIXED CollaborationSection - Removed markdown link syntax
+// ✅ FIXED CollaborationSection - EMAIL LINK CORRECTED
 function CollaborationSection() {
   return (
     <div className="py-16 md:py-20 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 relative overflow-hidden">
