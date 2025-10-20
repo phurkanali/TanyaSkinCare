@@ -259,13 +259,27 @@ export default function App() {
     }
   };
 
+  // ✅ FIXED useEffect - Safe AOS initialization
   useEffect(() => {
     try {
-      AOS.init({ duration: 600, once: true });
+      // Safe AOS initialization
+      if (AOS && typeof AOS.init === 'function') {
+        AOS.init({ 
+          duration: 600, 
+          once: true,
+          disable: 'mobile' // Better performance on mobile
+        });
+      }
+      
       window.scrollTo(0, 0);
-      fetchLiveStats();
+      
+      // Safe stats fetching
+      if (typeof fetchLiveStats === 'function') {
+        fetchLiveStats();
+      }
     } catch (err) {
-      console.error('Initialization error:', err);
+      console.warn('Non-critical initialization error:', err);
+      // App continues working even if AOS fails
     }
   }, []);
 
@@ -328,8 +342,6 @@ export default function App() {
     </div>
   );
 }
-
-// ... (rest of your existing components stay the same) ...
 
 // TopBar with safe navigation
 function TopBar({ showShopSection, onChatOpen, onPrivacyOpen }) {
@@ -591,6 +603,7 @@ function AboutSection() {
   );
 }
 
+// ✅ FIXED CollaborationSection - Removed markdown link syntax
 function CollaborationSection() {
   return (
     <div className="py-16 md:py-20 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 relative overflow-hidden">
