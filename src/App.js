@@ -85,22 +85,16 @@ try {
   fetchAllSocialStats = () => Promise.resolve({ youtube: null, instagram: null });
 }
 
-// ✅ EZOIC AD COMPONENT
+// ✅ Cleaned EzoicAd
 function EzoicAd({ id, size = "responsive" }) {
   useEffect(() => {
     const initAd = () => {
-      if (window.ezstandalone && window.ezstandalone.cmd) {
-        window.ezstandalone.cmd.push(function() {
-          window.ezstandalone.display(id);
-        });
-        console.log(`✅ Ezoic ad initialized: ${id}`);
+      if (window.ezstandalone?.cmd) {
+        window.ezstandalone.cmd.push(() => window.ezstandalone.display(id));
       } else {
-        console.log(`⏳ Waiting for Ezoic to load for ad: ${id}`);
         setTimeout(initAd, 1000);
       }
     };
-    
-    // Delay to ensure Ezoic is loaded
     setTimeout(initAd, 2000);
   }, [id]);
 
@@ -108,19 +102,8 @@ function EzoicAd({ id, size = "responsive" }) {
     <div 
       id={id}
       className={`ezoic-ad ${size === "responsive" ? "w-full flex justify-center" : ""}`}
-      style={{ 
-        minHeight: size === "responsive" ? "250px" : "auto",
-        textAlign: "center"
-      }}
-    >
-      <div 
-        className="ezoic-adpicker-ad bg-gray-100 rounded-lg flex items-center justify-center"
-        data-ad-type="banner"
-        data-ad-size={size}
-      >
-        <span className="text-gray-400 text-sm">Ad Loading - {id}</span>
-      </div>
-    </div>
+      style={{ minHeight: size === "responsive" ? "250px" : "auto", textAlign: "center" }}
+    />
   );
 }
 
@@ -217,7 +200,7 @@ const SOCIAL_CONFIG = {
 export default function App() {
   const showShopSection = process.env.REACT_APP_SHOW_SHOP_SECTION === "true";
   const [chatOpen, setChatOpen] = useState(false);
-  const [stats, setStats] = useState({ subscribers: 280, instagram: 72, monthlyViews: 191 });
+  const [stats, setStats] = useState({ subscribers: 316, instagram: 80, monthlyViews: 216 });
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
@@ -315,20 +298,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
-      
-      {/* ✅ EZOIC STATUS INDICATOR */}
-      <div className="bg-blue-50 py-2">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
-            ezoicReady ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-          }`}>
-            <div className={`w-2 h-2 rounded-full ${
-              ezoicReady ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'
-            }`}></div>
-            {ezoicReady ? '✅ Ezoic Connected' : '⏳ Connecting to Ezoic...'}
-          </div>
-        </div>
-      </div>
 
       <TopBar showShopSection={showShopSection} onChatOpen={() => setChatOpen(true)} onPrivacyOpen={() => setShowPrivacyPolicy(true)} />
       <main className="flex-1">
