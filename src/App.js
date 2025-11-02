@@ -413,6 +413,7 @@ function TopBar({ showShopSection, onChatOpen, onPrivacyOpen }) {
         <nav className="hidden md:flex gap-3 lg:gap-6 text-sm items-center">
           <SafeNavItem to="home" activeTab={activeTab} onClick={() => scrollToSection('home')}>Home</SafeNavItem>
           <SafeNavItem to="videos" activeTab={activeTab} onClick={() => scrollToSection('videos')}>Videos</SafeNavItem>
+          <a href="/remedies" className="block px-2 py-1 rounded cursor-pointer transition-all hover:text-pink-600 hover:bg-pink-50">Remedies</a>
           {showShopSection && <SafeNavItem to="shop" activeTab={activeTab} onClick={() => scrollToSection('shop')}>My Favorites</SafeNavItem>}
           <SafeNavItem to="about" activeTab={activeTab} onClick={() => scrollToSection('about')}>About Me</SafeNavItem>
           <SafeNavItem to="collaboration" activeTab={activeTab} onClick={() => scrollToSection('collaboration')}>Collaboration</SafeNavItem>
@@ -436,6 +437,7 @@ function TopBar({ showShopSection, onChatOpen, onPrivacyOpen }) {
         <div className="md:hidden bg-white px-4 py-3 space-y-1 shadow-lg">
           <SafeNavItem to="home" activeTab={activeTab} onClick={() => { scrollToSection('home'); setMenuOpen(false); }}>Home</SafeNavItem>
           <SafeNavItem to="videos" activeTab={activeTab} onClick={() => { scrollToSection('videos'); setMenuOpen(false); }}>Videos</SafeNavItem>
+          <a href="/remedies" className="block px-2 py-1 rounded cursor-pointer transition-all hover:text-pink-600 hover:bg-pink-50">Remedies</a>
           {showShopSection && <SafeNavItem to="shop" activeTab={activeTab} onClick={() => { scrollToSection('shop'); setMenuOpen(false); }}>My Favorites</SafeNavItem>}
           <SafeNavItem to="about" activeTab={activeTab} onClick={() => { scrollToSection('about'); setMenuOpen(false); }}>About Me</SafeNavItem>
           <SafeNavItem to="collaboration" activeTab={activeTab} onClick={() => { scrollToSection('collaboration'); setMenuOpen(false); }}>Collaboration</SafeNavItem>

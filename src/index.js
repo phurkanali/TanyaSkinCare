@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import PrivacyPolicy from './PrivacyPolicy';
+import RemediesPage from './RemediesPage';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -17,6 +18,9 @@ root.render(
 
         {/* Privacy Policy Page */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+        {/* Remedies Page */}
+        <Route path="/remedies" element={<RemediesPage />} />
       </Routes>
     </Router>
   </React.StrictMode>
